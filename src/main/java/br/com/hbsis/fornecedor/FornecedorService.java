@@ -15,11 +15,11 @@ public class FornecedorService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FornecedorService.class);
 
     private final IFornecedorRepository iFornecedorRepository;
-
-    @Autowired
     public FornecedorService(IFornecedorRepository iFornecedorRepository) {
         this.iFornecedorRepository = iFornecedorRepository;
     }
+
+
 
     public FornecedorDTO save(FornecedorDTO fornecedorDTO) {
         Fornecedor fornecedor = new Fornecedor(fornecedorDTO.getRazaoSocial(),
