@@ -12,10 +12,14 @@ public class Produto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nome")
+    @Column(name = "nome", unique = true, nullable = false, length = 100)
     private String nome;
 
-    @Column(name= "fornecedor_id")
+    @Column(name= "id_fornecedor" , nullable = false, insertable = false, updatable = false)
+    private  Long id_fornecedor;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_fornecedor", referencedColumnName = "id")
     private Fornecedor fornecedor;
 
     public Produto() {
@@ -23,7 +27,22 @@ public class Produto {
 
     public Produto(String nome, Fornecedor fornecedor) {
         this.nome = nome;
+        this.fornecedor= fornecedor;
+    }
+
+    public Produto(Long id, String nome, Long id_fornecedor, Fornecedor fornecedor) {
+        this.id = id;
+        this.nome = nome;
+        this.id_fornecedor = id_fornecedor;
         this.fornecedor = fornecedor;
+    }
+
+    public Long getId_fornecedor() {
+        return id_fornecedor;
+    }
+
+    public void setId_fornecedor(Long id_fornecedor) {
+        this.id_fornecedor = id_fornecedor;
     }
 
     public Long getId() {

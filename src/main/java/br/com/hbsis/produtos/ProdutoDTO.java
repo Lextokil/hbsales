@@ -16,8 +16,15 @@ public class ProdutoDTO {
         this.fornecedor = fornecedor;
     }
 
+    public ProdutoDTO(Long id, String nome, Fornecedor fornecedor) {
+        this.id = id;
+        this.nome = nome;
+        this.fornecedor = fornecedor;
+    }
+
     public static ProdutoDTO of(Produto produto) {
-        return new ProdutoDTO(produto.getNome(),
+        return new ProdutoDTO(produto.getId(),
+                produto.getNome(),
                 produto.getFornecedor());
 
     }
@@ -44,5 +51,14 @@ public class ProdutoDTO {
 
     public void setFornecedor(Fornecedor fornecedor) {
         this.fornecedor = fornecedor;
+    }
+
+    @Override
+    public String toString() {
+        return "Produto{" +
+                "id=" + id +
+                ", Nome ='" + nome + '\'' +
+                ", Fornecedor: ='" + fornecedor + '\'' +
+                '}';
     }
 }
