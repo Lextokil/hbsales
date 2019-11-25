@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,6 +23,11 @@ public class FornecedorService {
 
 
     public FornecedorDTO save(FornecedorDTO fornecedorDTO) {
+        this.validate(fornecedorDTO);
+
+        LOGGER.info("Salvando Fornecedor");
+        LOGGER.debug("Fornecedor: {}", fornecedorDTO);
+
         Fornecedor fornecedor = new Fornecedor(fornecedorDTO.getRazaoSocial(),
                 fornecedorDTO.getCnpj(),
                 fornecedorDTO.getNome(),
@@ -72,6 +78,26 @@ public class FornecedorService {
 
         throw new IllegalArgumentException(String.format("ID %s não existe", id));
     }
+
+    public List<Fornecedor> findAll() {
+
+        List<Fornecedor> fornecedores = (List<Fornecedor>) iFornecedorRepository.findAll();
+
+        return fornecedores;
+    }
+
+    public Fornecedor findFornecedorById(Long id) {
+        Optional<Fornecedor> fornecedorOptional = this.iFornecedorRepository.findById(id);
+
+        if (fornecedorOptional.isPresent()) {
+            return fornecedorOptional.get();
+        }
+
+        throw new IllegalArgumentException(String.format("ID %s não existe", id));
+    }
+
+
+
 
     public FornecedorDTO update(FornecedorDTO fornecedorDTO, Long id) {
         Optional<Fornecedor> fornecedorExistenteOptional = this.iFornecedorRepository.findById(id);
