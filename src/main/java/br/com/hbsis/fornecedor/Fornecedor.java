@@ -1,7 +1,5 @@
 package br.com.hbsis.fornecedor;
 
-
-
 import javax.persistence.*;
 
 @Entity

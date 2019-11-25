@@ -28,7 +28,8 @@ public class FornecedorService {
         LOGGER.info("Salvando Fornecedor");
         LOGGER.debug("Fornecedor: {}", fornecedorDTO);
 
-        Fornecedor fornecedor = new Fornecedor(fornecedorDTO.getRazaoSocial(),
+        Fornecedor fornecedor = new Fornecedor(
+                fornecedorDTO.getRazaoSocial(),
                 fornecedorDTO.getCnpj(),
                 fornecedorDTO.getNome(),
                 fornecedorDTO.getEndereco(),
@@ -55,6 +56,7 @@ public class FornecedorService {
         if (StringUtils.isEmpty(fornecedorDTO.getCnpj())) {
             throw new IllegalArgumentException("Cnpj não deve ser nulo/vazio");
         }
+
         if (StringUtils.isEmpty(fornecedorDTO.getNome())) {
             throw new IllegalArgumentException("Nome não deve ser nulo/vazio");
         }
@@ -79,12 +81,14 @@ public class FornecedorService {
         throw new IllegalArgumentException(String.format("ID %s não existe", id));
     }
 
+
     public List<Fornecedor> findAll() {
 
         List<Fornecedor> fornecedores = (List<Fornecedor>) iFornecedorRepository.findAll();
 
         return fornecedores;
     }
+
 
     public Fornecedor findFornecedorById(Long id) {
         Optional<Fornecedor> fornecedorOptional = this.iFornecedorRepository.findById(id);
@@ -95,8 +99,6 @@ public class FornecedorService {
 
         throw new IllegalArgumentException(String.format("ID %s não existe", id));
     }
-
-
 
 
     public FornecedorDTO update(FornecedorDTO fornecedorDTO, Long id) {
@@ -128,5 +130,6 @@ public class FornecedorService {
 
         this.iFornecedorRepository.deleteById(id);
     }
+
 
 }
