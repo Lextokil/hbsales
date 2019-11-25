@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * Classe resposável por receber as requisições externas ao sistema
  */
@@ -28,6 +30,8 @@ public class UsuarioRest {
 		return this.usuarioService.save(usuarioDTO);
 	}
 
+	
+
 	@GetMapping("/{id}")
 	public UsuarioDTO find(@PathVariable("id") Long id) {
 
@@ -35,6 +39,14 @@ public class UsuarioRest {
 
 		return this.usuarioService.findById(id);
 	}
+
+	@RequestMapping("/all")
+	public List<Usuario> findUsuarios() {
+
+		List<Usuario> usuarios = usuarioService.findAll();
+		return usuarios;
+	}
+
 
 	@PutMapping("/{id}")
 	public UsuarioDTO udpate(@PathVariable("id") Long id, @RequestBody UsuarioDTO usuarioDTO) {

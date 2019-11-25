@@ -1,6 +1,6 @@
 package br.com.hbsis.fornecedor;
 
-import org.springframework.data.annotation.Id;
+
 
 import javax.persistence.*;
 
@@ -9,6 +9,16 @@ import javax.persistence.*;
 public class Fornecedor {
 
     public Fornecedor() {
+    }
+
+    public Fornecedor(Long id, String razaoSocial, String cnpj, String nome, String endereco, String telefone, String email) {
+        this.id = id;
+        this.razaoSocial = razaoSocial;
+        this.cnpj = cnpj;
+        this.nome = nome;
+        this.endereco = endereco;
+        this.telefone = telefone;
+        this.email = email;
     }
 
     public Fornecedor(String razaoSocial, String cnpj, String nome, String endereco, String telefone, String email) {
@@ -20,23 +30,25 @@ public class Fornecedor {
         this.email = email;
     }
 
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "razao_social")
+    @Column(name = "razao_social", unique = true, nullable = false, length = 100)
     private String razaoSocial;
 
     @Column(name = "cnpj", unique = true, nullable = false, length = 50)
     private String cnpj;
 
-    @Column(name = "nome", length = 100, nullable = false)
+    @Column(name = "nome",  nullable = false)
     private String nome;
 
     @Column(name = "endereco", nullable = false)
     private String endereco;
 
-    @Column(name = "telefone", length = 20, nullable = false)
+    @Column(name = "telefone", length = 36, nullable = false)
     private String telefone;
 
     @Column(name = "email", nullable = false)

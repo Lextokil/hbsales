@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("fornecedores")
+@RequestMapping("/fornecedores")
 public class FornecedorRest {
     private static final Logger LOGGER = LoggerFactory.getLogger(FornecedorRest.class);
 
@@ -31,6 +33,12 @@ public class FornecedorRest {
         LOGGER.info("Recebendo find by ID... id: [{}]", id);
 
         return this.fornecedorService.findById(id);
+    }
+    @RequestMapping("/all")
+    public List<Fornecedor> findFornecedores() {
+
+        List<Fornecedor> fornecedores = fornecedorService.findAll();
+        return fornecedores;
     }
 
     @PutMapping("/{id}")
