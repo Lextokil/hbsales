@@ -1,6 +1,7 @@
 package br.com.hbsis.produtos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
+import com.opencsv.bean.CsvBindByPosition;
 
 import javax.persistence.*;
 
@@ -8,20 +9,28 @@ import javax.persistence.*;
 @Table(name = "produtos")
 public class CategoriaProduto {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @CsvBindByPosition(position = 0)
     private Long id;
 
+
     @Column(name = "cod_categoria", unique = true, nullable = false)
+    @CsvBindByPosition(position = 1)
     private String codCategoria;
+
     @Column(name = "nome", unique = true, nullable = false, length = 100)
+    @CsvBindByPosition(position = 2)
     private String nome;
 
     @Column(name= "id_fornecedor" , nullable = false, insertable = false, updatable = false)
+    @CsvBindByPosition(position = 3)
     private  Long id_fornecedor;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_fornecedor", referencedColumnName = "id")
+    @CsvBindByPosition(position = 4)
     private Fornecedor fornecedor;
 
     public CategoriaProduto() {
@@ -83,10 +92,7 @@ public class CategoriaProduto {
 
     @Override
     public String toString() {
-        return "Produto{" +
-                "id=" + id +
-                ", Nome ='" + nome + '\'' +
-                ", Fornecedor: ='" + fornecedor + '\'' +
-                '}';
+        return this.getId() +";" +this.getNome() + ";" +this.getCodCategoria() + ";" +this.getId_fornecedor()+";" +
+                this.getFornecedor().getNome();
     }
 }
