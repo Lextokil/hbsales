@@ -1,20 +1,19 @@
 package br.com.hbsis.produtos;
 
-import com.opencsv.CSVWriter;
-import com.opencsv.CSVWriterBuilder;
-import com.opencsv.ICSVWriter;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.FileNotFoundException;
+
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -24,6 +23,7 @@ public class CategoriaProdutoRest {
     private static final Logger LOGGER = LoggerFactory.getLogger(CategoriaProdutoRest.class);
 
     private final CategoriaProdutoService categoriaProdutoService;
+
 
     @Autowired
     public CategoriaProdutoRest(CategoriaProdutoService categoriaProdutoService) throws FileNotFoundException {
@@ -44,6 +44,27 @@ public class CategoriaProdutoRest {
         LOGGER.info("Recebendo find by ID... id: [{}]", id);
 
         return this.categoriaProdutoService.findById(id);
+    }
+
+   /* @GetMapping(value = "/model")
+    public String home(Model model){
+        model.addAttribute("produtos", new CategoriaProduto());
+        List<CategoriaProduto> catprods = categoriaProdutoService.findAll();
+        model.addAttribute("produtos", catprods);
+        return "view/catprod";
+    }*/
+
+    @PostMapping(value = "/fileupload")
+    public String uploadFile(@RequestParam MultipartFile arquivoCsv){
+        boolean isFlag = categoriaProdutoService.saveDataFromUploadFile(arquivoCsv);
+        if(isFlag){
+            LOGGER.info("Successmessage", "File Upload Successfully!");
+
+        }else{
+           LOGGER.info("Errormessage", "File Upload not done!");
+        }
+
+        return  "redirect:/";
     }
 
     @RequestMapping("/all")
@@ -68,15 +89,12 @@ public class CategoriaProdutoRest {
     }
     @GetMapping("/export-catprod")
     public void exportCSV(HttpServletResponse response) throws Exception {
-
-        //set file name and content type
         String filename = "catprod.csv";
 
         response.setContentType("text/csv");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + filename + "\"");
 
-        //create a csv writer
         PrintWriter writer1 = response.getWriter();
 
         ICSVWriter icsvWriter = new CSVWriterBuilder(writer1).
@@ -92,13 +110,7 @@ public class CategoriaProdutoRest {
         }
 
 
-
     }
-
-
-
-
-
 
 
 }

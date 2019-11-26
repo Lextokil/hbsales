@@ -1,14 +1,21 @@
 package br.com.hbsis.produtos;
 
+import br.com.hbsis.fornecedor.Fornecedor;
 import br.com.hbsis.fornecedor.FornecedorService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
 
 @Service
 public class CategoriaProdutoService {
@@ -109,16 +116,57 @@ public class CategoriaProdutoService {
         this.iCategoriaProdutoRepository.deleteById(id);
     }
 
-    public List<String> formatedCSV(List<CategoriaProduto> categoriaProdutos ) {
 
-        List<String> categoriaProdutosformatados = new ArrayList<>();
-        for (int i = 0; i < categoriaProdutos.size() ; i++) {
-            categoriaProdutosformatados.add(categoriaProdutos.get(i).toString());
-
+    public boolean saveDataFromUploadFile(MultipartFile file) {
+        boolean isFlag = false;
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        if(extension.equalsIgnoreCase("json")){
+            isFlag = readDataFromJson(file);
+        }else if (extension.equalsIgnoreCase("csv")){
+            isFlag = readDataFromCsv(file);
         }
 
-        return categoriaProdutosformatados;
+        return isFlag;
     }
 
+    private boolean readDataFromCsv(MultipartFile file) {
+        try {
+            InputStreamReader reader = new InputStreamReader(file.getInputStream());
+            CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
 
+            List<String[]> rows = csvReader.readAll();
+
+
+            for(String[] row : rows){
+                String[] rowsTemp = row[0].split(";");
+
+
+                Fornecedor fornecedor = new Fornecedor();
+                fornecedor = fornecedorService.findFornecedorById(Long.parseLong(rowsTemp[2]));
+              //  fornecedor.setId(Long.parseLong(rowsTemp[0]));
+                iCategoriaProdutoRepository.save(new CategoriaProduto(rowsTemp[0], rowsTemp[1],fornecedor));
+            }
+            return  true;
+        }catch (Exception e){
+            LOGGER.info(e.toString());
+            return false;
+        }
+    }
+
+    private boolean readDataFromJson(MultipartFile file) {
+        try {
+            InputStream inputStream = file.getInputStream();
+            ObjectMapper mapper = new ObjectMapper();
+            List<CategoriaProduto>categoriaProdutos = Arrays.asList(mapper.readValue(inputStream, CategoriaProduto[].class));
+            if(categoriaProdutos != null && categoriaProdutos.size()>0){
+                for (CategoriaProduto categoriaProduto: categoriaProdutos) {
+                    //categoriaProduto.setFileType(FilenameUtils.getExtension(file.getOriginalFilename()));
+                    iCategoriaProdutoRepository.save(categoriaProduto);
+                }
+            }
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
 }

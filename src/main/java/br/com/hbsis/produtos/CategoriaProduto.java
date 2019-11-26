@@ -2,6 +2,8 @@ package br.com.hbsis.produtos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
 import com.opencsv.bean.CsvBindByPosition;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 
@@ -12,26 +14,24 @@ public class CategoriaProduto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @CsvBindByPosition(position = 0)
     private Long id;
 
 
     @Column(name = "cod_categoria", unique = true, nullable = false)
-    @CsvBindByPosition(position = 1)
     private String codCategoria;
 
     @Column(name = "nome", unique = true, nullable = false, length = 100)
-    @CsvBindByPosition(position = 2)
     private String nome;
 
     @Column(name= "id_fornecedor" , nullable = false, insertable = false, updatable = false)
-    @CsvBindByPosition(position = 3)
     private  Long id_fornecedor;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_fornecedor", referencedColumnName = "id")
-    @CsvBindByPosition(position = 4)
     private Fornecedor fornecedor;
+
+    @Transient
+    private MultipartFile file;
 
     public CategoriaProduto() {
     }
@@ -41,6 +41,7 @@ public class CategoriaProduto {
         this.nome = nome;
         this.fornecedor= fornecedor;
     }
+
 
     public CategoriaProduto(Long id, String codCategoria, String nome, Long id_fornecedor, Fornecedor fornecedor) {
         this.id = id;
@@ -89,6 +90,15 @@ public class CategoriaProduto {
     public void setFornecedor(Fornecedor fornecedor) {
         this.fornecedor = fornecedor;
     }
+
+    public MultipartFile getFile() {
+        return file;
+    }
+
+    public void setFile(MultipartFile file) {
+        this.file = file;
+    }
+
 
     @Override
     public String toString() {
