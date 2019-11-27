@@ -26,7 +26,7 @@ public class CategoriaProduto {
     @Column(name= "id_fornecedor" , nullable = false, insertable = false, updatable = false)
     private  Long id_fornecedor;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "id_fornecedor", referencedColumnName = "id")
     private Fornecedor fornecedor;
 

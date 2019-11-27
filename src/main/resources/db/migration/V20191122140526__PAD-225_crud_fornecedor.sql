@@ -6,7 +6,5 @@ create table fornecedores
     nome VARCHAR (255) NOT NULL,
     endereco VARCHAR (255) NOT NULL,
     telefone VARCHAR (36) NOT NULL,
-    email VARCHAR (255) NOT NULL,
-
-
+    email VARCHAR (255) NOT NULL
 );

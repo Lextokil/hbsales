@@ -92,8 +92,10 @@ public class CategoriaProdutoService {
     public CategoriaProdutoDTO update(CategoriaProdutoDTO categoriaProdutoDTO, Long id) {
         Optional<CategoriaProduto> produtoExistenteOptional = this.iCategoriaProdutoRepository.findById(id);
 
+
         if (produtoExistenteOptional.isPresent()) {
             CategoriaProduto categoriaProdutoExistente = produtoExistenteOptional.get();
+            categoriaProdutoDTO.setFornecedor(fornecedorService.findFornecedorById(categoriaProdutoDTO.getFornecedor().getId()));
 
             LOGGER.info("Atualizando produto... id: [{}]", categoriaProdutoExistente.getId());
             LOGGER.debug("Payload: {}", categoriaProdutoDTO);
@@ -141,9 +143,8 @@ public class CategoriaProdutoService {
                 String[] rowsTemp = row[0].split(";");
 
 
-                Fornecedor fornecedor = new Fornecedor();
-                fornecedor = fornecedorService.findFornecedorById(Long.parseLong(rowsTemp[2]));
-              //  fornecedor.setId(Long.parseLong(rowsTemp[0]));
+                Fornecedor fornecedor = fornecedorService.findFornecedorById(Long.parseLong(rowsTemp[2]));
+
                 iCategoriaProdutoRepository.save(new CategoriaProduto(rowsTemp[0], rowsTemp[1],fornecedor));
             }
             return  true;

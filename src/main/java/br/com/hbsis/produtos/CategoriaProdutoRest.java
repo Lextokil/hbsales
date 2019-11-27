@@ -46,13 +46,7 @@ public class CategoriaProdutoRest {
         return this.categoriaProdutoService.findById(id);
     }
 
-   /* @GetMapping(value = "/model")
-    public String home(Model model){
-        model.addAttribute("produtos", new CategoriaProduto());
-        List<CategoriaProduto> catprods = categoriaProdutoService.findAll();
-        model.addAttribute("produtos", catprods);
-        return "view/catprod";
-    }*/
+
 
     @PostMapping(value = "/fileupload")
     public String uploadFile(@RequestParam MultipartFile arquivoCsv){
