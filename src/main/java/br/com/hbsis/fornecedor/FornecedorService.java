@@ -1,10 +1,8 @@
 package br.com.hbsis.fornecedor;
 
-import br.com.hbsis.usuario.UsuarioService;
 import com.microsoft.sqlserver.jdbc.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

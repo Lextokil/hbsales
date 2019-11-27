@@ -1,8 +1,6 @@
 package br.com.hbsis.produtos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
-import com.opencsv.bean.CsvBindByPosition;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
@@ -23,9 +21,6 @@ public class CategoriaProduto {
     @Column(name = "nome", unique = true, nullable = false, length = 100)
     private String nome;
 
-    @Column(name= "id_fornecedor" , nullable = false, insertable = false, updatable = false)
-    private  Long id_fornecedor;
-
     @ManyToOne
     @JoinColumn(name = "id_fornecedor", referencedColumnName = "id")
     private Fornecedor fornecedor;
@@ -43,21 +38,14 @@ public class CategoriaProduto {
     }
 
 
-    public CategoriaProduto(Long id, String codCategoria, String nome, Long id_fornecedor, Fornecedor fornecedor) {
+    public CategoriaProduto(Long id, String codCategoria, String nome,  Fornecedor fornecedor) {
         this.id = id;
         this.codCategoria = codCategoria;
         this.nome = nome;
-        this.id_fornecedor = id_fornecedor;
         this.fornecedor = fornecedor;
     }
 
-    public Long getId_fornecedor() {
-        return id_fornecedor;
-    }
 
-    public void setId_fornecedor(Long id_fornecedor) {
-        this.id_fornecedor = id_fornecedor;
-    }
 
     public Long getId() {
         return id;
@@ -102,7 +90,7 @@ public class CategoriaProduto {
 
     @Override
     public String toString() {
-        return this.getId() +";" +this.getNome() + ";" +this.getCodCategoria() + ";" +this.getId_fornecedor()+";" +
+        return this.getId() +";" +this.getNome() + ";" +this.getCodCategoria() + ";" +this.getFornecedor().getId()+";" +
                 this.getFornecedor().getNome();
     }
 }

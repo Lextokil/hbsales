@@ -6,10 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
@@ -102,8 +100,6 @@ public class CategoriaProdutoRest {
             icsvWriter.writeNext(new String[]{row.getId().toString(),
                     row.getCodCategoria(), row.getNome(), row.getFornecedor().getId().toString()});
         }
-
-
     }
 
 

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
@@ -122,9 +121,7 @@ public class CategoriaProdutoService {
     public boolean saveDataFromUploadFile(MultipartFile file) {
         boolean isFlag = false;
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        if(extension.equalsIgnoreCase("json")){
-            isFlag = readDataFromJson(file);
-        }else if (extension.equalsIgnoreCase("csv")){
+     if (extension.equalsIgnoreCase("csv")){
             isFlag = readDataFromCsv(file);
         }
 
@@ -136,16 +133,16 @@ public class CategoriaProdutoService {
             InputStreamReader reader = new InputStreamReader(file.getInputStream());
             CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
 
-            List<String[]> rows = csvReader.readAll();
+            List<String[]> linhas = csvReader.readAll();
 
 
-            for(String[] row : rows){
-                String[] rowsTemp = row[0].split(";");
+            for(String[] linha : linhas){
+                String[] linhaTemp = linha[0].split(";");
 
 
-                Fornecedor fornecedor = fornecedorService.findFornecedorById(Long.parseLong(rowsTemp[2]));
+                Fornecedor fornecedor = fornecedorService.findFornecedorById(Long.parseLong(linhaTemp[2]));
 
-                iCategoriaProdutoRepository.save(new CategoriaProduto(rowsTemp[0], rowsTemp[1],fornecedor));
+                iCategoriaProdutoRepository.save(new CategoriaProduto(linhaTemp[0], linhaTemp[1],fornecedor));
             }
             return  true;
         }catch (Exception e){
@@ -154,20 +151,4 @@ public class CategoriaProdutoService {
         }
     }
 
-    private boolean readDataFromJson(MultipartFile file) {
-        try {
-            InputStream inputStream = file.getInputStream();
-            ObjectMapper mapper = new ObjectMapper();
-            List<CategoriaProduto>categoriaProdutos = Arrays.asList(mapper.readValue(inputStream, CategoriaProduto[].class));
-            if(categoriaProdutos != null && categoriaProdutos.size()>0){
-                for (CategoriaProduto categoriaProduto: categoriaProdutos) {
-                    //categoriaProduto.setFileType(FilenameUtils.getExtension(file.getOriginalFilename()));
-                    iCategoriaProdutoRepository.save(categoriaProduto);
-                }
-            }
-            return true;
-        }catch (Exception e){
-            return false;
-        }
-    }
 }
