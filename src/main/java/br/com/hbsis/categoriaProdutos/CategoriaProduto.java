@@ -1,4 +1,4 @@
-package br.com.hbsis.produtos;
+package br.com.hbsis.categoriaProdutos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,8 +25,7 @@ public class CategoriaProduto {
     @JoinColumn(name = "id_fornecedor", referencedColumnName = "id")
     private Fornecedor fornecedor;
 
-    @Transient
-    private MultipartFile file;
+
 
     public CategoriaProduto() {
     }
@@ -79,13 +78,6 @@ public class CategoriaProduto {
         this.fornecedor = fornecedor;
     }
 
-    public MultipartFile getFile() {
-        return file;
-    }
-
-    public void setFile(MultipartFile file) {
-        this.file = file;
-    }
 
 
     @Override

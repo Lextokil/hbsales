@@ -1,8 +1,7 @@
-package br.com.hbsis.produtos;
+package br.com.hbsis.categoriaProdutos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
 import br.com.hbsis.fornecedor.FornecedorService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import org.apache.commons.io.FilenameUtils;
@@ -21,7 +20,7 @@ public class CategoriaProdutoService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CategoriaProdutoService.class);
 
-    private  final ICategoriaProdutoRepository iCategoriaProdutoRepository;
+    private final ICategoriaProdutoRepository iCategoriaProdutoRepository;
     private final FornecedorService fornecedorService;
 
     public CategoriaProdutoService(ICategoriaProdutoRepository iCategoriaProdutoRepository, FornecedorService fornecedorService) {
@@ -151,4 +150,13 @@ public class CategoriaProdutoService {
         }
     }
 
+    public CategoriaProduto findCategoriaProdutoById(Long id) {
+        Optional<CategoriaProduto> categoriaProduto = this.iCategoriaProdutoRepository.findById(id);
+
+        if (categoriaProduto.isPresent()) {
+            return categoriaProduto.get();
+        }
+
+        throw new IllegalArgumentException(String.format("ID %s não existe", id));
+    }
 }
