@@ -1,17 +1,19 @@
 package br.com.hbsis.linhaCategoria;
 
+import br.com.hbsis.categoriaProdutos.CategoriaProduto;
 import br.com.hbsis.categoriaProdutos.CategoriaProdutoService;
-import com.opencsv.CSVWriter;
-import com.opencsv.CSVWriterBuilder;
-import com.opencsv.ICSVWriter;
+import com.opencsv.*;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Optional;
@@ -149,5 +151,37 @@ public class LinhaCategoriaService {
             LOGGER.info("Exportando Linha Categoria ID: {}", row.getIdLinhaCategoria());
         }
 
+    }
+
+    public boolean saveDataFromUploadFile(MultipartFile file) {
+        boolean isFlag = false;
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        if (extension.equalsIgnoreCase("csv")){
+            isFlag = readDataFromCsv(file);
+        }
+
+        return isFlag;
+    }
+    private boolean readDataFromCsv(MultipartFile file) {
+        try {
+            InputStreamReader reader = new InputStreamReader(file.getInputStream());
+            CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
+
+            List<String[]> linhas = csvReader.readAll();
+
+
+            for(String[] linha : linhas){
+                String[] linhaTemp = linha[0].split(";");
+
+
+                CategoriaProduto categoriaProduto = categoriaProdutoService.findCategoriaProdutoById(Long.parseLong(linhaTemp[2]));
+
+                iLinhaCategoriaRepository.save(new LinhaCategoria(linhaTemp[0], linhaTemp[1],categoriaProduto));
+            }
+            return  true;
+        }catch (Exception e){
+            LOGGER.info("Falhou no metodo ReadDataFromCsv: " ,e.toString());
+            return false;
+        }
     }
 }

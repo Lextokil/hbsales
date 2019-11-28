@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -53,6 +54,19 @@ public class LinhaCategoriaRest {
         LOGGER.info("Exportando linha de categorias {}");
         linhaCategoriaService.exportFromData(response);
 
+    }
+
+    @PostMapping(value = "/fileupload")
+    public String uploadFile(@RequestParam MultipartFile arquivoCsv){
+        boolean isFlag = linhaCategoriaService.saveDataFromUploadFile(arquivoCsv);
+        if(isFlag){
+            LOGGER.info("Successmessage", "File Upload Successfully!");
+
+        }else{
+            LOGGER.info("Errormessage", "File Upload not done!");
+        }
+
+        return  "redirect:/";
     }
 
     @PutMapping("/{id}")
