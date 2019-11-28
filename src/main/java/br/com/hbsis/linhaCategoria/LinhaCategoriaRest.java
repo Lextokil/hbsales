@@ -1,11 +1,17 @@
 package br.com.hbsis.linhaCategoria;
 
 import br.com.hbsis.categoriaProdutos.CategoriaProdutoRest;
+import com.opencsv.CSVWriter;
+import com.opencsv.CSVWriterBuilder;
+import com.opencsv.ICSVWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 import java.util.List;
 
 @RestController
@@ -41,6 +47,12 @@ public class LinhaCategoriaRest {
 
         List<LinhaCategoria> linhaCategorias = linhaCategoriaService.findAll();
         return linhaCategorias;
+    }
+    @GetMapping("/export-linhacat")
+    public void exportCSV(HttpServletResponse response) throws Exception {
+        LOGGER.info("Exportando linha de categorias {}");
+        linhaCategoriaService.exportFromData(response);
+
     }
 
     @PutMapping("/{id}")

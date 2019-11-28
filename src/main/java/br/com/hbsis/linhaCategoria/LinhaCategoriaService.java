@@ -1,11 +1,18 @@
 package br.com.hbsis.linhaCategoria;
 
 import br.com.hbsis.categoriaProdutos.CategoriaProdutoService;
+import com.opencsv.CSVWriter;
+import com.opencsv.CSVWriterBuilder;
+import com.opencsv.ICSVWriter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,6 +93,8 @@ public class LinhaCategoriaService {
         return linhaCategorias;
     }
 
+
+
     public LinhaCategoriaDTO update(LinhaCategoriaDTO linhaCategoriaDTO, Long id) {
         Optional<LinhaCategoria> linhaCategoriaOptional = this.iLinhaCategoriaRepository.findById(id);
         linhaCategoriaDTO.setCategoriaProduto(categoriaProdutoService.findCategoriaProdutoById
@@ -117,4 +126,28 @@ public class LinhaCategoriaService {
         this.iLinhaCategoriaRepository.deleteById(id);
     }
 
+    public void exportFromData(HttpServletResponse response) throws IOException {
+        String filename = "linhacat.csv";
+        Boolean succes = false;
+
+        response.setContentType("text/csv");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + filename + "\"");
+
+        PrintWriter writer1 = response.getWriter();
+        ICSVWriter icsvWriter = new CSVWriterBuilder(writer1).
+                withSeparator(';').
+                withEscapeChar(CSVWriter.DEFAULT_ESCAPE_CHARACTER).
+                withLineEnd(CSVWriter.DEFAULT_LINE_END).
+                build();
+        String headerCSV[] = {"ID_LINHA_CAT", "COD_LINHA", "NOME_LINHA", "ID_CATEGORIA"};
+        icsvWriter.writeNext(headerCSV);
+
+        for (LinhaCategoria row: this.findAll()){
+            icsvWriter.writeNext(new String[]{String.valueOf(row.getIdLinhaCategoria()), row.getCodLinha(), row.getNomeLinha(),
+                    String.valueOf(row.getCategoriaProduto().getId())});
+            LOGGER.info("Exportando Linha Categoria ID: {}", row.getIdLinhaCategoria());
+        }
+
+    }
 }
