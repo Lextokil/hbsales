@@ -81,25 +81,9 @@ public class CategoriaProdutoRest {
     }
     @GetMapping("/export-catprod")
     public void exportCSV(HttpServletResponse response) throws Exception {
-        String filename = "catprod.csv";
+        LOGGER.info("Exportando categorias de produtos da base");
+        categoriaProdutoService.exportFromData(response);
 
-        response.setContentType("text/csv");
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + filename + "\"");
-
-        PrintWriter writer1 = response.getWriter();
-
-        ICSVWriter icsvWriter = new CSVWriterBuilder(writer1).
-                                    withSeparator(';').
-                                    withEscapeChar(CSVWriter.DEFAULT_ESCAPE_CHARACTER).
-                                    withLineEnd(CSVWriter.DEFAULT_LINE_END).
-                                    build();
-        String headerCSV[] = {"ID_PRODUTO", "COD_PRODUTO", "NOME_PRODUTO", "ID_FORNECEDOR"};
-        icsvWriter.writeNext(headerCSV);
-        for (CategoriaProduto row: categoriaProdutoService.findAll()){
-            icsvWriter.writeNext(new String[]{row.getId().toString(),
-                    row.getCodCategoria(), row.getNome(), row.getFornecedor().getId().toString()});
-        }
     }
 
 

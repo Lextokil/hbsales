@@ -2,17 +2,20 @@ package br.com.hbsis.categoriaProdutos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
 import br.com.hbsis.fornecedor.FornecedorService;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
+import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.*;
 
 @Service
@@ -158,5 +161,28 @@ public class CategoriaProdutoService {
         }
 
         throw new IllegalArgumentException(String.format("ID %s não existe", id));
+    }
+
+    public void exportFromData(HttpServletResponse response) throws IOException {
+        String filename = "catprod.csv";
+
+        response.setContentType("text/csv");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + filename + "\"");
+
+        PrintWriter writer1 = response.getWriter();
+
+        ICSVWriter icsvWriter = new CSVWriterBuilder(writer1).
+                withSeparator(';').
+                withEscapeChar(CSVWriter.DEFAULT_ESCAPE_CHARACTER).
+                withLineEnd(CSVWriter.DEFAULT_LINE_END).
+                build();
+        String headerCSV[] = {"ID_PRODUTO", "COD_PRODUTO", "NOME_PRODUTO", "ID_FORNECEDOR"};
+        icsvWriter.writeNext(headerCSV);
+        for (CategoriaProduto row: this.findAll()){
+            icsvWriter.writeNext(new String[]{row.getId().toString(),
+                    row.getCodCategoria(), row.getNome(), row.getFornecedor().getId().toString()});
+            LOGGER.info("Exportando categoria de produto de ID: {}", row.getId());
+        }
     }
 }
