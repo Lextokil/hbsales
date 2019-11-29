@@ -7,18 +7,18 @@ public class CategoriaProdutoDTO {
     private Long id;
     private String codCategoria;
     private String nome;
-    private Fornecedor fornecedor;
+    private Long fornecedor;
 
     public CategoriaProdutoDTO() {
     }
 
-    public CategoriaProdutoDTO(String codCategoria, String nome, Fornecedor fornecedor) {
+    public CategoriaProdutoDTO(String codCategoria, String nome, Long fornecedor) {
         this.codCategoria = codCategoria;
         this.nome = nome;
         this.fornecedor = fornecedor;
     }
 
-    public CategoriaProdutoDTO(Long id, String codCategoria, String nome, Fornecedor fornecedor) {
+    public CategoriaProdutoDTO(Long id, String codCategoria, String nome, Long fornecedor) {
         this.id = id;
         this.codCategoria = codCategoria;
         this.nome = nome;
@@ -29,7 +29,7 @@ public class CategoriaProdutoDTO {
         return new CategoriaProdutoDTO(categoriaProduto.getId(),
                 categoriaProduto.getCodCategoria(),
                 categoriaProduto.getNome(),
-                categoriaProduto.getFornecedor());
+                categoriaProduto.getFornecedor().getId());
 
     }
 
@@ -58,11 +58,11 @@ public class CategoriaProdutoDTO {
         this.nome = nome;
     }
 
-    public Fornecedor getFornecedor() {
+    public Long getFornecedor() {
         return fornecedor;
     }
 
-    public void setFornecedor(Fornecedor fornecedor) {
+    public void setFornecedor(Long fornecedor) {
         this.fornecedor = fornecedor;
     }
 

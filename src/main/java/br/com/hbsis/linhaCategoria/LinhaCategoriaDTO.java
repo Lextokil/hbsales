@@ -6,19 +6,19 @@ public class LinhaCategoriaDTO {
 
     private Long idLinhaCategoria;
     private String codLinha;
-    private CategoriaProduto categoriaProduto;
+    private Long categoriaProduto;
     private String nomeLinha;
 
     public LinhaCategoriaDTO() {
     }
 
-    public LinhaCategoriaDTO(String codLinha, String nomeLinha, CategoriaProduto categoriaProduto) {
+    public LinhaCategoriaDTO(String codLinha, String nomeLinha, Long categoriaProduto) {
         this.codLinha = codLinha;
         this.categoriaProduto = categoriaProduto;
         this.nomeLinha = nomeLinha;
     }
 
-    public LinhaCategoriaDTO(Long idLinhaCategoria, String codLinha, String nomeLinha, CategoriaProduto categoriaProduto) {
+    public LinhaCategoriaDTO(Long idLinhaCategoria, String codLinha, String nomeLinha, Long categoriaProduto) {
         this.idLinhaCategoria = idLinhaCategoria;
         this.codLinha = codLinha;
         this.categoriaProduto = categoriaProduto;
@@ -41,11 +41,11 @@ public class LinhaCategoriaDTO {
         this.codLinha = codLinha;
     }
 
-    public CategoriaProduto getCategoriaProduto() {
+    public Long getCategoriaProduto() {
         return categoriaProduto;
     }
 
-    public void setCategoriaProduto(CategoriaProduto categoriaProduto) {
+    public void setCategoriaProduto(Long categoriaProduto) {
         this.categoriaProduto = categoriaProduto;
     }
 
@@ -61,7 +61,7 @@ public class LinhaCategoriaDTO {
                         linhaCategoria.getIdLinhaCategoria(),
                         linhaCategoria.getCodLinha(),
                         linhaCategoria.getNomeLinha(),
-                        linhaCategoria.getCategoriaProduto());
+                        linhaCategoria.getCategoriaProduto().getId());
 
     }
 }

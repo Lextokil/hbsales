@@ -10,6 +10,7 @@ public class LinhaCategoria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long idLinhaCategoria;
 
     @Column(name = "cod_linha")
@@ -31,7 +32,7 @@ public class LinhaCategoria {
         this.nomeLinha = nomeLinha;
     }
 
-    public LinhaCategoria(Long idLinhaCategoria, String codLinha,String nomeLinha, CategoriaProduto categoriaProduto) {
+    public LinhaCategoria(Long idLinhaCategoria, String codLinha, String nomeLinha, CategoriaProduto categoriaProduto) {
         this.idLinhaCategoria = idLinhaCategoria;
         this.codLinha = codLinha;
         this.categoriaProduto = categoriaProduto;

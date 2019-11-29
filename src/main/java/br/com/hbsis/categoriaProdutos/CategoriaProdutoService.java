@@ -33,18 +33,18 @@ public class CategoriaProdutoService {
 
     public CategoriaProdutoDTO save(CategoriaProdutoDTO categoriaProdutoDTO) {
 
-        categoriaProdutoDTO.setFornecedor(fornecedorService.findFornecedorById((categoriaProdutoDTO.getFornecedor().getId())));
+        Fornecedor fornecedor = fornecedorService.findFornecedorById(categoriaProdutoDTO.getFornecedor());
 
         this.validate(categoriaProdutoDTO);
         LOGGER.info("Salvando Produto");
         LOGGER.debug("Produto: {}", categoriaProdutoDTO);
-        LOGGER.debug("Fornecedor", categoriaProdutoDTO.getFornecedor().getNome());
+        LOGGER.debug("Fornecedor", categoriaProdutoDTO.getFornecedor());
 
 
         CategoriaProduto categoriaProduto = new CategoriaProduto(
                     categoriaProdutoDTO.getCodCategoria(),
                     categoriaProdutoDTO.getNome(),
-                    categoriaProdutoDTO.getFornecedor());
+                    fornecedor);
 
 
 
@@ -92,11 +92,11 @@ public class CategoriaProdutoService {
 
     public CategoriaProdutoDTO update(CategoriaProdutoDTO categoriaProdutoDTO, Long id) {
         Optional<CategoriaProduto> produtoExistenteOptional = this.iCategoriaProdutoRepository.findById(id);
+        Fornecedor fornecedor = fornecedorService.findFornecedorById(categoriaProdutoDTO.getFornecedor());
 
 
         if (produtoExistenteOptional.isPresent()) {
             CategoriaProduto categoriaProdutoExistente = produtoExistenteOptional.get();
-            categoriaProdutoDTO.setFornecedor(fornecedorService.findFornecedorById(categoriaProdutoDTO.getFornecedor().getId()));
 
             LOGGER.info("Atualizando produto... id: [{}]", categoriaProdutoExistente.getId());
             LOGGER.debug("Payload: {}", categoriaProdutoDTO);
@@ -104,7 +104,7 @@ public class CategoriaProdutoService {
 
             categoriaProdutoExistente.setCodCategoria(categoriaProdutoDTO.getCodCategoria());
             categoriaProdutoExistente.setNome(categoriaProdutoDTO.getNome());
-            categoriaProdutoExistente.setFornecedor(categoriaProdutoDTO.getFornecedor());
+            categoriaProdutoExistente.setFornecedor(fornecedor);
 
             categoriaProdutoExistente = this.iCategoriaProdutoRepository.save(categoriaProdutoExistente);
 
@@ -139,12 +139,11 @@ public class CategoriaProdutoService {
 
 
             for(String[] linha : linhas){
-                String[] linhaTemp = linha[0].split(";");
+                String[] linhaTemp = linha[0].replaceAll("\"", "" ).split(";");
 
+                Fornecedor fornecedor = fornecedorService.findFornecedorById(Long.parseLong(linhaTemp[3]));
 
-                Fornecedor fornecedor = fornecedorService.findFornecedorById(Long.parseLong(linhaTemp[2]));
-
-                iCategoriaProdutoRepository.save(new CategoriaProduto(linhaTemp[0], linhaTemp[1],fornecedor));
+                iCategoriaProdutoRepository.save(new CategoriaProduto(linhaTemp[1], linhaTemp[2],fornecedor));
             }
             return  true;
         }catch (Exception e){
@@ -181,7 +180,7 @@ public class CategoriaProdutoService {
         icsvWriter.writeNext(headerCSV);
         for (CategoriaProduto row: this.findAll()){
             icsvWriter.writeNext(new String[]{row.getId().toString(),
-                    row.getCodCategoria(), row.getNome(), row.getFornecedor().getId().toString()});
+                    row.getCodCategoria(), row.getNome(), row.getFornecedor().toString()});
             LOGGER.info("Exportando categoria de produto de ID: {}", row.getId());
         }
     }

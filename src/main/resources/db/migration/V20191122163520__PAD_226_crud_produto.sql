@@ -1,4 +1,4 @@
-create table produtos
+create table categorias
 (
     id    BIGINT IDENTITY (1, 1) NOT NULL,
     nome VARCHAR(100)           NOT NULL,

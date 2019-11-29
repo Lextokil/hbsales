@@ -1,12 +1,11 @@
 package br.com.hbsis.categoriaProdutos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 
 @Entity
-@Table(name = "produtos")
+@Table(name = "categorias")
 public class CategoriaProduto {
 
 
@@ -82,7 +81,6 @@ public class CategoriaProduto {
 
     @Override
     public String toString() {
-        return this.getId() +";" +this.getNome() + ";" +this.getCodCategoria() + ";" +this.getFornecedor().getId()+";" +
-                this.getFornecedor().getNome();
+        return this.getId() +";" +this.getNome() + ";" +this.getCodCategoria() + ";" +this.getFornecedor();
     }
 }
