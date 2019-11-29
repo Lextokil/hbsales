@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
@@ -31,6 +33,26 @@ public class ProdutoRest {
     public ProdutoDTO find(@PathVariable("id") Long id){
         LOGGER.info("Recebendo produto de ID: [{}]", id);
         return this.produtoService.findById(id);
+    }
+
+    @GetMapping("/export-produtos")
+    public void exportCSV(HttpServletResponse response) throws Exception {
+        LOGGER.info("Exportando linha de categorias {}");
+        produtoService.exportFromData(response);
+
+    }
+
+    @PostMapping(value = "/fileupload")
+    public String uploadFile(@RequestParam MultipartFile arquivoCsv){
+        boolean isFlag = produtoService.saveDataFromUploadFile(arquivoCsv);
+        if(isFlag){
+            LOGGER.info("Successmessage", "File Upload Successfully!");
+
+        }else{
+            LOGGER.info("Errormessage", "File Upload not done!");
+        }
+
+        return  "redirect:/";
     }
 
     @RequestMapping("/all")

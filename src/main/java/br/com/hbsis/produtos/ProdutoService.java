@@ -2,11 +2,19 @@ package br.com.hbsis.produtos;
 
 import br.com.hbsis.linhaCategoria.LinhaCategoria;
 import br.com.hbsis.linhaCategoria.LinhaCategoriaService;
+import com.opencsv.*;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Optional;
 
@@ -129,5 +137,64 @@ public class ProdutoService {
         LOGGER.info("Executando delete para produto de ID: [{}]", id);
 
         this.iProdutoRepository.deleteById(id);
+    }
+
+    public void exportFromData(HttpServletResponse response) throws IOException {
+        String filename = "produtos.csv";
+        Boolean succes = false;
+
+        response.setContentType("text/csv");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + filename + "\"");
+
+        PrintWriter writer1 = response.getWriter();
+        ICSVWriter icsvWriter = new CSVWriterBuilder(writer1).
+                withSeparator(';').
+                withEscapeChar(CSVWriter.DEFAULT_ESCAPE_CHARACTER).
+                withLineEnd(CSVWriter.DEFAULT_LINE_END).
+                build();
+        String headerCSV[] = {"ID", "COD_PRODUTO", "NOME_PRODUTO", "PRECO_PRODUTO", "UNIDADE_PRODUTO", "PESO_UNIDADE", "VALIDADE", "ID_LINHA"};
+        icsvWriter.writeNext(headerCSV);
+
+        for (Produto row: this.findAll()){
+            icsvWriter.writeNext(new String[]{String.valueOf(row.getId()),row.getCodProduto(), row.getNomeProduto(),
+                    String.valueOf(row.getPrecoProduto()), String.valueOf(row.getUnidadeProduto()),
+                    String.valueOf(row.getPesoUnidade()), row.getValidadeProduto(), String.valueOf(row.getLinhaCategoria().getIdLinhaCategoria())});
+            LOGGER.info("Exportando Linha Categoria ID: {}", row.getId());
+        }
+
+    }
+    public boolean saveDataFromUploadFile(MultipartFile file) {
+        boolean isFlag = false;
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        if (extension.equalsIgnoreCase("csv")){
+            isFlag = readDataFromCsv(file);
+        }
+
+        return isFlag;
+    }
+    private boolean readDataFromCsv(MultipartFile file) {
+        try {
+            InputStreamReader reader = new InputStreamReader(file.getInputStream());
+            CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
+
+            List<String[]> linhas = csvReader.readAll();
+
+
+            for(String[] linha : linhas){
+                String[] linhaTemp = linha[0].replaceAll("\"", "" ).split(";");
+
+                LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(Long.parseLong(linhaTemp[7]));
+
+                Produto produto = new Produto(linhaTemp[1], linhaTemp[2], Double.parseDouble(linhaTemp[3]), Integer.parseInt(linhaTemp[4]),
+                                               Double.parseDouble(linhaTemp[5]), linhaTemp[6], linhaCategoria);
+
+                produto = this.iProdutoRepository.save(produto);
+            }
+            return  true;
+        }catch (Exception e){
+            LOGGER.info("Falhou no metodo ReadDataFromCsv: " ,e.toString());
+            return false;
+        }
     }
 }
