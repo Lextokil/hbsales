@@ -32,12 +32,12 @@ public class ProdutoService {
 
     public ProdutoDTO save(ProdutoDTO produtoDTO) {
 
+
         LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(produtoDTO.getLinhaCategoria());
 
         this.validate(produtoDTO);
         LOGGER.info("Salvando Produto");
         LOGGER.debug("Produto: {}", produtoDTO);
-
 
 
         Produto produto = new Produto(
@@ -49,7 +49,6 @@ public class ProdutoService {
                 produtoDTO.getValidadeProduto(),
                 linhaCategoria
         );
-
 
 
         produto = this.iProdutoRepository.save(produto);
@@ -64,7 +63,7 @@ public class ProdutoService {
             throw new IllegalArgumentException("Produto não deve ser nulo");
         }
 
-        if (StringUtils.isEmpty(produtoDTO.getCodProduto())){
+        if (StringUtils.isEmpty(produtoDTO.getCodProduto())) {
             throw new IllegalArgumentException("Codigo do produto não deve ser nulo");
         }
 
@@ -88,7 +87,9 @@ public class ProdutoService {
             throw new IllegalArgumentException("Linha do produto tem que ter um ID");
         }
     }
+
     public ProdutoDTO findById(Long id) {
+
         Optional<Produto> produto = this.iProdutoRepository.findById(id);
 
         if (produto.isPresent()) {
@@ -100,14 +101,13 @@ public class ProdutoService {
 
     public List<Produto> findAll() {
 
-        List<Produto> produtos =  iProdutoRepository.findAll();
+        List<Produto> produtos = iProdutoRepository.findAll();
 
         return produtos;
     }
 
     public ProdutoDTO update(ProdutoDTO produtoDTO, Long id) {
         Optional<Produto> produtoOptional = this.iProdutoRepository.findById(id);
-
 
 
         if (produtoOptional.isPresent()) {
@@ -133,6 +133,7 @@ public class ProdutoService {
         }
         throw new IllegalArgumentException(String.format("ID %s não existe", id));
     }
+
     public void delete(Long id) {
         LOGGER.info("Executando delete para produto de ID: [{}]", id);
 
@@ -156,23 +157,35 @@ public class ProdutoService {
         String headerCSV[] = {"ID", "COD_PRODUTO", "NOME_PRODUTO", "PRECO_PRODUTO", "UNIDADE_PRODUTO", "PESO_UNIDADE", "VALIDADE", "ID_LINHA"};
         icsvWriter.writeNext(headerCSV);
 
-        for (Produto row: this.findAll()){
-            icsvWriter.writeNext(new String[]{String.valueOf(row.getId()),row.getCodProduto(), row.getNomeProduto(),
+        for (Produto row : this.findAll()) {
+            icsvWriter.writeNext(new String[]{String.valueOf(row.getId()), row.getCodProduto(), row.getNomeProduto(),
                     String.valueOf(row.getPrecoProduto()), String.valueOf(row.getUnidadeProduto()),
                     String.valueOf(row.getPesoUnidade()), row.getValidadeProduto(), String.valueOf(row.getLinhaCategoria().getIdLinhaCategoria())});
             LOGGER.info("Exportando Linha Categoria ID: {}", row.getId());
         }
 
     }
+
     public boolean saveDataFromUploadFile(MultipartFile file) {
         boolean isFlag = false;
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        if (extension.equalsIgnoreCase("csv")){
+        if (extension.equalsIgnoreCase("csv")) {
             isFlag = readDataFromCsv(file);
         }
 
         return isFlag;
     }
+
+    public boolean saveProdutosWithFornecedorID(MultipartFile file, Long id) {
+        boolean isFlag = false;
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        if (extension.equalsIgnoreCase("csv")) {
+            isFlag = readDataFromCsvWithFornecedorID(file, id);
+        }
+
+        return isFlag;
+    }
+
     private boolean readDataFromCsv(MultipartFile file) {
         try {
             InputStreamReader reader = new InputStreamReader(file.getInputStream());
@@ -181,20 +194,79 @@ public class ProdutoService {
             List<String[]> linhas = csvReader.readAll();
 
 
-            for(String[] linha : linhas){
-                String[] linhaTemp = linha[0].replaceAll("\"", "" ).split(";");
+            for (String[] linha : linhas) {
+                String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
 
                 LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(Long.parseLong(linhaTemp[7]));
 
                 Produto produto = new Produto(linhaTemp[1], linhaTemp[2], Double.parseDouble(linhaTemp[3]), Integer.parseInt(linhaTemp[4]),
-                                               Double.parseDouble(linhaTemp[5]), linhaTemp[6], linhaCategoria);
+                        Double.parseDouble(linhaTemp[5]), linhaTemp[6], linhaCategoria);
 
                 produto = this.iProdutoRepository.save(produto);
+                LOGGER.info("Sucesso ao cadastrar o produto do codigo: ", produto.getCodProduto());
             }
-            return  true;
-        }catch (Exception e){
-            LOGGER.info("Falhou no metodo ReadDataFromCsv: " ,e.toString());
+            return true;
+        } catch (Exception e) {
+            LOGGER.info("Falhou no metodo ReadDataFromCsv: ", e.toString());
             return false;
         }
+    }
+
+    private boolean readDataFromCsvWithFornecedorID(MultipartFile file, Long idFornecedor) {
+
+        try {
+            InputStreamReader reader = new InputStreamReader(file.getInputStream());
+            CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
+
+            List<String[]> linhas = csvReader.readAll();
+
+            for (String[] linha : linhas) {
+                String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
+
+                boolean verificarFornecedor = this.checkFornecedorFromProduto(Long.parseLong(linhaTemp[7]), idFornecedor);
+
+                if (verificarFornecedor) {
+
+                    Optional<Produto> produtoExistente = iProdutoRepository.findByCodProduto(linhaTemp[1]);
+
+                    if (produtoExistente.isPresent()) {
+
+                        ProdutoDTO produtoDTOUpdate = new ProdutoDTO();
+                        produtoDTOUpdate.setIdProduto(produtoExistente.get().getId());
+                        produtoDTOUpdate.setCodProduto(linhaTemp[1]);
+                        produtoDTOUpdate.setNomeProduto(linhaTemp[2]);
+                        produtoDTOUpdate.setPrecoProduto(Double.parseDouble(linhaTemp[3]));
+                        produtoDTOUpdate.setUnidadeProduto(Integer.parseInt(linhaTemp[4]));
+                        produtoDTOUpdate.setPesoUnidade(Double.parseDouble(linhaTemp[5]));
+                        produtoDTOUpdate.setValidadeProduto(linhaTemp[6]);
+                        produtoDTOUpdate.setLinhaCategoria(Long.parseLong(linhaTemp[7]));
+                        this.update(produtoDTOUpdate, produtoDTOUpdate.getIdProduto());
+
+                    } else {
+
+                        LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(Long.parseLong(linhaTemp[7]));
+
+                        Produto produto = new Produto(linhaTemp[1], linhaTemp[2],
+                                Double.parseDouble(linhaTemp[3]), Integer.parseInt(linhaTemp[4]),
+                                Double.parseDouble(linhaTemp[5]), linhaTemp[6], linhaCategoria);
+
+                        this.iProdutoRepository.save(produto);
+                    }
+                }
+
+            }
+            return true;
+        } catch (Exception e) {
+            LOGGER.info("Falhou no metodo ReadDataFromCsv: ", e.toString());
+            return false;
+        }
+
+    }
+
+    public boolean checkFornecedorFromProduto(Long idLinha, Long idFornecedorToCheck) {
+        boolean isSameFornecedor = false;
+        LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(idLinha);
+        isSameFornecedor = linhaCategoria.getCategoriaProduto().getFornecedor().getId() == idFornecedorToCheck;
+        return isSameFornecedor;
     }
 }

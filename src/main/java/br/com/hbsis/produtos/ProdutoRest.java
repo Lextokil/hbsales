@@ -1,5 +1,8 @@
 package br.com.hbsis.produtos;
 
+import br.com.hbsis.fornecedor.Fornecedor;
+import br.com.hbsis.fornecedor.FornecedorDTO;
+import br.com.hbsis.fornecedor.FornecedorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +18,12 @@ public class ProdutoRest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProdutoRest.class);
 
     private final ProdutoService produtoService;
+    private final FornecedorService fornecedorService;
 
     @Autowired
-    public ProdutoRest(ProdutoService produtoService) {
+    public ProdutoRest(ProdutoService produtoService, FornecedorService fornecedorService) {
         this.produtoService = produtoService;
+        this.fornecedorService = fornecedorService;
     }
 
     @PostMapping
@@ -31,6 +36,7 @@ public class ProdutoRest {
 
     @GetMapping("/{id}")
     public ProdutoDTO find(@PathVariable("id") Long id){
+
         LOGGER.info("Recebendo produto de ID: [{}]", id);
         return this.produtoService.findById(id);
     }
@@ -45,6 +51,19 @@ public class ProdutoRest {
     @PostMapping(value = "/fileupload")
     public String uploadFile(@RequestParam MultipartFile arquivoCsv){
         boolean isFlag = produtoService.saveDataFromUploadFile(arquivoCsv);
+        if(isFlag){
+            LOGGER.info("Successmessage", "File Upload Successfully!");
+
+        }else{
+            LOGGER.info("Errormessage", "File Upload not done!");
+        }
+
+        return  "redirect:/";
+    }
+    @PostMapping(value = "/fileupload/{id}")
+    public String uploadFileFromFornecedor(@RequestParam MultipartFile arquivoCsv, @PathVariable("id")Long id){
+        FornecedorDTO fornecedorDTOExistente =  fornecedorService.findById(id);
+        boolean isFlag = produtoService.saveProdutosWithFornecedorID(arquivoCsv, fornecedorDTOExistente.getId());
         if(isFlag){
             LOGGER.info("Successmessage", "File Upload Successfully!");
 
