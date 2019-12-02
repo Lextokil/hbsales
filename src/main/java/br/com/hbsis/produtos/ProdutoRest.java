@@ -6,6 +6,7 @@ import br.com.hbsis.fornecedor.FornecedorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -85,7 +86,7 @@ public class ProdutoRest {
         LOGGER.info("Recebendo Update para produto de ID: {}", id);
         LOGGER.debug("Payload: {}", produtoDTO);
 
-        return  this.produtoService.update(produtoDTO, id);
+        return this.produtoService.update(produtoDTO, id);
     }
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id") Long id){

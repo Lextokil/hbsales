@@ -1,4 +1,4 @@
-package br.com.hbsis.usuario;
+package br.com.hbsis.fornecedor;
 
 import br.com.hbsis.fornecedor.Fornecedor;
 import br.com.hbsis.fornecedor.FornecedorDTO;
