@@ -2,6 +2,7 @@ package br.com.hbsis.linhaCategoria;
 
 import br.com.hbsis.categoriaProdutos.CategoriaProduto;
 import br.com.hbsis.categoriaProdutos.CategoriaProdutoService;
+import br.com.hbsis.util.Extension;
 import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -42,13 +43,11 @@ public class LinhaCategoriaService {
         LOGGER.debug("Produto: {}", linhaCategoriaDTO);
 
 
-
         LinhaCategoria linhaCategoria = new LinhaCategoria(
-                                linhaCategoriaDTO.getCodLinha(),
-                                linhaCategoriaDTO.getNomeLinha(),
-                                categoriaProduto
+                linhaCategoriaDTO.getCodLinha(),
+                linhaCategoriaDTO.getNomeLinha(),
+                categoriaProduto
         );
-
 
 
         linhaCategoria = this.iLinhaCategoriaRepository.save(linhaCategoria);
@@ -63,7 +62,7 @@ public class LinhaCategoriaService {
             throw new IllegalArgumentException("Linha de categoria não deve ser nula");
         }
 
-        if (StringUtils.isEmpty(linhaCategoriaDTO.getNomeLinha())){
+        if (StringUtils.isEmpty(linhaCategoriaDTO.getNomeLinha())) {
             throw new IllegalArgumentException("Nome da linha de categoria não deve ser nulo");
         }
 
@@ -85,6 +84,7 @@ public class LinhaCategoriaService {
 
         throw new IllegalArgumentException(String.format("ID %s não existe", id));
     }
+
     public LinhaCategoria findLinhaById(Long id) {
         Optional<LinhaCategoria> linhaCategoria = this.iLinhaCategoriaRepository.findById(id);
 
@@ -98,11 +98,10 @@ public class LinhaCategoriaService {
 
     public List<LinhaCategoria> findAll() {
 
-        List<LinhaCategoria> linhaCategorias =  iLinhaCategoriaRepository.findAll();
+        List<LinhaCategoria> linhaCategorias = iLinhaCategoriaRepository.findAll();
 
         return linhaCategorias;
     }
-
 
 
     public LinhaCategoriaDTO update(LinhaCategoriaDTO linhaCategoriaDTO, Long id) {
@@ -137,7 +136,6 @@ public class LinhaCategoriaService {
 
     public void exportFromData(HttpServletResponse response) throws IOException {
         String filename = "linhacat.csv";
-        Boolean succes = false;
 
         response.setContentType("text/csv");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
@@ -152,7 +150,7 @@ public class LinhaCategoriaService {
         String headerCSV[] = {"ID_LINHA_CAT", "COD_LINHA", "NOME_LINHA", "ID_CATEGORIA"};
         icsvWriter.writeNext(headerCSV);
 
-        for (LinhaCategoria row: this.findAll()){
+        for (LinhaCategoria row : this.findAll()) {
             icsvWriter.writeNext(new String[]{String.valueOf(row.getIdLinhaCategoria()), row.getCodLinha(), row.getNomeLinha(),
                     String.valueOf(row.getCategoriaProduto())});
             LOGGER.info("Exportando Linha Categoria ID: {}", row.getIdLinhaCategoria());
@@ -160,36 +158,32 @@ public class LinhaCategoriaService {
 
     }
 
-    public boolean saveDataFromUploadFile(MultipartFile file) {
-        boolean isFlag = false;
+    public void saveDataFromUploadFile(MultipartFile file) throws Exception {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        if (extension.equalsIgnoreCase("csv")){
-            isFlag = readDataFromCsv(file);
+        if (Extension.CSV.getDescricao().equalsIgnoreCase(extension)) {
+            readDataFromCsv(file);
+        } else {
+            throw new Exception("Formato de arquivo invalido");
         }
 
-        return isFlag;
     }
-    private boolean readDataFromCsv(MultipartFile file) {
-        try {
-            InputStreamReader reader = new InputStreamReader(file.getInputStream());
-            CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
 
-            List<String[]> linhas = csvReader.readAll();
+    private void readDataFromCsv(MultipartFile file) throws IOException {
 
+        InputStreamReader reader = new InputStreamReader(file.getInputStream());
+        CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
 
-            for(String[] linha : linhas){
-                String[] linhaTemp = linha[0].replaceAll("\"", "" ).split(";");
+        List<String[]> linhas = csvReader.readAll();
 
-                CategoriaProduto categoriaProduto = categoriaProdutoService.findCategoriaProdutoById(Long.parseLong(linhaTemp[3]));
+        for (String[] linha : linhas) {
+            String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
 
-                LinhaCategoria linhaCategoria = new LinhaCategoria(linhaTemp[1], linhaTemp[2], categoriaProduto);
+            CategoriaProduto categoriaProduto = categoriaProdutoService.findCategoriaProdutoById(Long.parseLong(linhaTemp[3]));
 
-                linhaCategoria = this.iLinhaCategoriaRepository.save(linhaCategoria);
-            }
-            return  true;
-        }catch (Exception e){
-            LOGGER.info("Falhou no metodo ReadDataFromCsv: " ,e.toString());
-            return false;
+            LinhaCategoria linhaCategoria = new LinhaCategoria(linhaTemp[1], linhaTemp[2], categoriaProduto);
+
+            this.iLinhaCategoriaRepository.save(linhaCategoria);
         }
+
     }
 }

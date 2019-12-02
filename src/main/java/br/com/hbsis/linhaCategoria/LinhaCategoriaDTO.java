@@ -1,7 +1,5 @@
 package br.com.hbsis.linhaCategoria;
 
-import br.com.hbsis.categoriaProdutos.CategoriaProduto;
-
 public class LinhaCategoriaDTO {
 
     private Long idLinhaCategoria;

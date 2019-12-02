@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -45,18 +46,16 @@ public class CategoriaProdutoRest {
     }
 
 
-
     @PostMapping(value = "/fileupload")
-    public String uploadFile(@RequestParam MultipartFile arquivoCsv){
-        boolean isFlag = categoriaProdutoService.saveDataFromUploadFile(arquivoCsv);
-        if(isFlag){
-            LOGGER.info("Successmessage", "File Upload Successfully!");
-
-        }else{
-           LOGGER.info("Errormessage", "File Upload not done!");
+    public void uploadFile(@RequestParam MultipartFile arquivoCsv) throws Exception {
+        try {
+            categoriaProdutoService.saveDataFromUploadFile(arquivoCsv);
+        } catch (Exception e) {
+            String erroAoImportarCsv = "Erro ao importar CSV";
+            LOGGER.error(erroAoImportarCsv, e);
+            throw new Exception(erroAoImportarCsv);
         }
-
-        return  "redirect:/";
+        LOGGER.info("Successmessage", "File Upload Successfully!");
     }
 
     @RequestMapping("/all")
@@ -73,12 +72,14 @@ public class CategoriaProdutoRest {
 
         return this.categoriaProdutoService.update(categoriaProdutoDTO, id);
     }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id") Long id) {
         LOGGER.info("Recebendo Delete para produto de ID: {}", id);
 
         this.categoriaProdutoService.delete(id);
     }
+
     @GetMapping("/export-catprod")
     public void exportCSV(HttpServletResponse response) throws Exception {
         LOGGER.info("Exportando categorias de produtos da base");

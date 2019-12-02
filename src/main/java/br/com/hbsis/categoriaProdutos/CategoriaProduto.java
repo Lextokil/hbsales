@@ -81,6 +81,10 @@ public class CategoriaProduto {
 
     @Override
     public String toString() {
-        return this.getId() +";" +this.getNome() + ";" +this.getCodCategoria() + ";" +this.getFornecedor();
+        return "Categoria:"+'\''+
+                "ID: "+this.getId()+'\''+
+                "Nome: "+this.getNome()+'\''+
+                "Codigo: "+this.codCategoria+'\''+
+                "ID fornecedor: "+this.getFornecedor().getId();
     }
 }

@@ -2,6 +2,7 @@ package br.com.hbsis.produtos;
 
 import br.com.hbsis.linhaCategoria.LinhaCategoria;
 import br.com.hbsis.linhaCategoria.LinhaCategoriaService;
+import br.com.hbsis.util.Extension;
 import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -166,55 +167,51 @@ public class ProdutoService {
 
     }
 
-    public boolean saveDataFromUploadFile(MultipartFile file) {
-        boolean isFlag = false;
+    public void saveDataFromUploadFile(MultipartFile file) throws Exception {
+
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        if (extension.equalsIgnoreCase("csv")) {
-            isFlag = readDataFromCsv(file);
+        if (Extension.CSV.getDescricao().equalsIgnoreCase(extension)) {
+            readDataFromCsv(file);
+        } else {
+            throw new Exception("Formato de arquivo invalido");
         }
 
-        return isFlag;
     }
 
-    public boolean saveProdutosWithFornecedorID(MultipartFile file, Long id) {
-        boolean isFlag = false;
+    public void saveProdutosWithFornecedorID(MultipartFile file, Long id) throws Exception {
+
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        if (extension.equalsIgnoreCase("csv")) {
-            isFlag = readDataFromCsvWithFornecedorID(file, id);
+        if (Extension.CSV.getDescricao().equalsIgnoreCase(extension)) {
+            readDataFromCsvWithFornecedorID(file, id);
+        } else {
+            throw new Exception("Formato de arquivo invalido");
         }
 
-        return isFlag;
     }
 
-    private boolean readDataFromCsv(MultipartFile file) {
-        try {
-            InputStreamReader reader = new InputStreamReader(file.getInputStream());
-            CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
+    private void readDataFromCsv(MultipartFile file) throws IOException {
 
-            List<String[]> linhas = csvReader.readAll();
+        InputStreamReader reader = new InputStreamReader(file.getInputStream());
+        CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
 
+        List<String[]> linhas = csvReader.readAll();
 
-            for (String[] linha : linhas) {
-                String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
+        for (String[] linha : linhas) {
+            String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
 
-                LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(Long.parseLong(linhaTemp[7]));
+            LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(Long.parseLong(linhaTemp[7]));
 
-                Produto produto = new Produto(linhaTemp[1], linhaTemp[2], Double.parseDouble(linhaTemp[3]), Integer.parseInt(linhaTemp[4]),
-                        Double.parseDouble(linhaTemp[5]), linhaTemp[6], linhaCategoria);
+            Produto produto = new Produto(linhaTemp[1], linhaTemp[2], Double.parseDouble(linhaTemp[3]), Integer.parseInt(linhaTemp[4]),
+                    Double.parseDouble(linhaTemp[5]), linhaTemp[6], linhaCategoria);
 
-                produto = this.iProdutoRepository.save(produto);
-                LOGGER.info("Sucesso ao cadastrar o produto do codigo: ", produto.getCodProduto());
-            }
-            return true;
-        } catch (Exception e) {
-            LOGGER.info("Falhou no metodo ReadDataFromCsv: ", e.toString());
-            return false;
+            this.iProdutoRepository.save(produto);
         }
+
     }
 
-    private boolean readDataFromCsvWithFornecedorID(MultipartFile file, Long idFornecedor) {
+    private void readDataFromCsvWithFornecedorID(MultipartFile file, Long idFornecedor) throws IOException {
 
-        try {
+
             InputStreamReader reader = new InputStreamReader(file.getInputStream());
             CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
 
@@ -255,11 +252,6 @@ public class ProdutoService {
                 }
 
             }
-            return true;
-        } catch (Exception e) {
-            LOGGER.info("Falhou no metodo ReadDataFromCsv: ", e.toString());
-            return false;
-        }
 
     }
 

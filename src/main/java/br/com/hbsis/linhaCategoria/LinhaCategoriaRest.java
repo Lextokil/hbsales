@@ -1,18 +1,13 @@
 package br.com.hbsis.linhaCategoria;
 
 import br.com.hbsis.categoriaProdutos.CategoriaProdutoRest;
-import com.opencsv.CSVWriter;
-import com.opencsv.CSVWriterBuilder;
-import com.opencsv.ICSVWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
 import java.util.List;
 
 @RestController
@@ -57,16 +52,16 @@ public class LinhaCategoriaRest {
     }
 
     @PostMapping(value = "/fileupload")
-    public String uploadFile(@RequestParam MultipartFile arquivoCsv){
-        boolean isFlag = linhaCategoriaService.saveDataFromUploadFile(arquivoCsv);
-        if(isFlag){
-            LOGGER.info("Successmessage", "File Upload Successfully!");
-
-        }else{
-            LOGGER.info("Errormessage", "File Upload not done!");
+    public void uploadFile(@RequestParam MultipartFile arquivoCsv) throws Exception {
+        try {
+            linhaCategoriaService.saveDataFromUploadFile(arquivoCsv);
+        }catch (Exception e)  {
+            String erroAoImportarCsv = "Erro ao importar CSV";
+            LOGGER.error(erroAoImportarCsv, e);
+            throw new Exception(erroAoImportarCsv);
         }
+        LOGGER.info("Successmessage File Upload Successfully!");
 
-        return  "redirect:/";
     }
 
     @PutMapping("/{id}")
