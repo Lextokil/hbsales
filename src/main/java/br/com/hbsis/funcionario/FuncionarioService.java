@@ -25,13 +25,13 @@ public class FuncionarioService {
         LOGGER.info("Salvando Funcionario");
         LOGGER.debug("Fornecedor: {}", funcionarioDTO);
 
-        Funcionario funcionario = new Funcionario(
+        Funcionario funcionarioSave = new Funcionario(
                 funcionarioDTO.getNome(),
                 funcionarioDTO.getEmail());
 
-        funcionario = this.iFuncionarioRepository.save(funcionario);
+        funcionarioSave = this.iFuncionarioRepository.save(funcionarioSave);
 
-        return FuncionarioDTO.of(funcionario);
+        return FuncionarioDTO.of(funcionarioSave);
 
     }
 

@@ -1,4 +1,4 @@
-package br.com.hbsis.categoriaProdutos;
+package br.com.hbsis.categoriaprodutos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
 import br.com.hbsis.fornecedor.FornecedorService;

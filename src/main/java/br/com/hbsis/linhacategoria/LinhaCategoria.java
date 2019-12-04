@@ -1,6 +1,6 @@
-package br.com.hbsis.linhaCategoria;
+package br.com.hbsis.linhacategoria;
 
-import br.com.hbsis.categoriaProdutos.CategoriaProduto;
+import br.com.hbsis.categoriaprodutos.CategoriaProduto;
 
 import javax.persistence.*;
 
@@ -27,13 +27,6 @@ public class LinhaCategoria {
     }
 
     public LinhaCategoria(String codLinha,  String nomeLinha, CategoriaProduto categoriaProduto) {
-        this.codLinha = codLinha;
-        this.categoriaProduto = categoriaProduto;
-        this.nomeLinha = nomeLinha;
-    }
-
-    public LinhaCategoria(Long idLinhaCategoria, String codLinha, String nomeLinha, CategoriaProduto categoriaProduto) {
-        this.idLinhaCategoria = idLinhaCategoria;
         this.codLinha = codLinha;
         this.categoriaProduto = categoriaProduto;
         this.nomeLinha = nomeLinha;

@@ -1,7 +1,5 @@
 package br.com.hbsis.produtos;
 
-import br.com.hbsis.linhaCategoria.LinhaCategoria;
-
 public class ProdutoDTO {
     private  Long idProduto;
     private String codProduto;
@@ -15,17 +13,6 @@ public class ProdutoDTO {
     public ProdutoDTO() {
     }
 
-    public ProdutoDTO(String codProduto, String nomeProduto, Double precoProduto,
-                      int unidadeProduto, Double pesoUnidade, String validadeProduto,
-                      Long linhaCategoria) {
-        this.codProduto = codProduto;
-        this.nomeProduto = nomeProduto;
-        this.precoProduto = precoProduto;
-        this.unidadeProduto = unidadeProduto;
-        this.pesoUnidade = pesoUnidade;
-        this.validadeProduto = validadeProduto;
-        this.linhaCategoria = linhaCategoria;
-    }
 
     public ProdutoDTO(Long idProduto, String codProduto, String nomeProduto, Double precoProduto,
                       int unidadeProduto, Double pesoUnidade, String validadeProduto,

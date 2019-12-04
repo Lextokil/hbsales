@@ -1,4 +1,4 @@
-package br.com.hbsis.categoriaProdutos;
+package br.com.hbsis.categoriaprodutos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
 
@@ -33,14 +33,6 @@ public class CategoriaProduto {
         this.codCategoria = codCategoria;
         this.nome = nome;
         this.fornecedor= fornecedor;
-    }
-
-
-    public CategoriaProduto(Long id, String codCategoria, String nome,  Fornecedor fornecedor) {
-        this.id = id;
-        this.codCategoria = codCategoria;
-        this.nome = nome;
-        this.fornecedor = fornecedor;
     }
 
 

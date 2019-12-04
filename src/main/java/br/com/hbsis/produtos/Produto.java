@@ -1,6 +1,6 @@
 package br.com.hbsis.produtos;
 
-import br.com.hbsis.linhaCategoria.LinhaCategoria;
+import br.com.hbsis.linhacategoria.LinhaCategoria;
 
 import javax.persistence.*;
 
@@ -50,18 +50,6 @@ public class Produto {
         this.linhaCategoria = linhaCategoria;
     }
 
-    public Produto(Long id, String codProduto, String nomeProduto,
-                   Double precoProduto, int unidadeProduto, Double pesoUnidade,
-                   String validadeProduto, LinhaCategoria linhaCategoria) {
-        this.id = id;
-        this.codProduto = codProduto;
-        this.nomeProduto = nomeProduto;
-        this.precoProduto = precoProduto;
-        this.unidadeProduto = unidadeProduto;
-        this.pesoUnidade = pesoUnidade;
-        this.validadeProduto = validadeProduto;
-        this.linhaCategoria = linhaCategoria;
-    }
 
 
 

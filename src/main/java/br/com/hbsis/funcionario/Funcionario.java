@@ -3,10 +3,12 @@ package br.com.hbsis.funcionario;
 import javax.persistence.*;
 
 @Entity
+@Table(name = "funcionarios")
 public class Funcionario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "nome", nullable = false)
@@ -23,11 +25,7 @@ public class Funcionario {
         this.email = email;
     }
 
-    public Funcionario(Long id, String nome, String email) {
-        this.id = id;
-        this.nome = nome;
-        this.email = email;
-    }
+
 
     public Long getId() {
         return id;

@@ -1,4 +1,4 @@
-package br.com.hbsis.periodoVendas;
+package br.com.hbsis.periodovendas;
 
 import java.util.Date;
 
@@ -13,12 +13,7 @@ public class PeriodoVendasDTO {
     public PeriodoVendasDTO() {
     }
 
-    public PeriodoVendasDTO(Date dataInicio, Date dataFinal, Date dataRetirada, Long idFornecedor) {
-        this.dataInicio = dataInicio;
-        this.dataFinal = dataFinal;
-        this.dataRetirada = dataRetirada;
-        this.idFornecedor = idFornecedor;
-    }
+
 
     public PeriodoVendasDTO(Long id, Date dataInicio, Date dataFinal, Date dataRetirada, Long idFornecedor) {
         this.id = id;

@@ -1,4 +1,4 @@
-package br.com.hbsis.periodoVendas;
+package br.com.hbsis.periodovendas;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

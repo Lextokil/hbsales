@@ -1,7 +1,7 @@
 package br.com.hbsis.produtos;
 
-import br.com.hbsis.linhaCategoria.LinhaCategoria;
-import br.com.hbsis.linhaCategoria.LinhaCategoriaService;
+import br.com.hbsis.linhacategoria.LinhaCategoria;
+import br.com.hbsis.linhacategoria.LinhaCategoriaService;
 import br.com.hbsis.util.Extension;
 import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;
@@ -95,6 +95,16 @@ public class ProdutoService {
 
         if (produto.isPresent()) {
             return ProdutoDTO.of(produto.get());
+        }
+
+        throw new IllegalArgumentException(String.format("ID %s não existe", id));
+    }
+    public Produto findProdutoById(Long id) {
+
+        Optional<Produto> produto = this.iProdutoRepository.findById(id);
+
+        if (produto.isPresent()) {
+            return produto.get();
         }
 
         throw new IllegalArgumentException(String.format("ID %s não existe", id));
