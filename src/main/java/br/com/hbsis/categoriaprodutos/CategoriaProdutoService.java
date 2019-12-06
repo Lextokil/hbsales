@@ -149,7 +149,7 @@ public class CategoriaProdutoService {
 
             Fornecedor fornecedor = fornecedorService.findFornecedorById(Long.parseLong(linhaTemp[3]));
 
-            iCategoriaProdutoRepository.save(new CategoriaProduto(linhaTemp[1], linhaTemp[2], fornecedor));
+            save(CategoriaProdutoDTO.of(new CategoriaProduto(linhaTemp[1], linhaTemp[2], fornecedor)));
         }
     }
 
