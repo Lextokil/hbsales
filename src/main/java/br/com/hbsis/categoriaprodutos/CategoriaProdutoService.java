@@ -2,8 +2,10 @@ package br.com.hbsis.categoriaprodutos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
 import br.com.hbsis.fornecedor.FornecedorService;
+import br.com.hbsis.fornecedor.IFornecedorRepository;
 import br.com.hbsis.util.CodeManager;
 import br.com.hbsis.util.Extension;
+import br.com.hbsis.validation.CnpjValidator;
 import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -15,9 +17,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.MaskFormatter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.text.ParseException;
 import java.util.*;
 
 @Service
@@ -27,10 +31,12 @@ public class CategoriaProdutoService {
 
     private final ICategoriaProdutoRepository iCategoriaProdutoRepository;
     private final FornecedorService fornecedorService;
+    private final IFornecedorRepository iFornecedorRepository;
 
-    public CategoriaProdutoService(ICategoriaProdutoRepository iCategoriaProdutoRepository, FornecedorService fornecedorService) {
+    public CategoriaProdutoService(ICategoriaProdutoRepository iCategoriaProdutoRepository, FornecedorService fornecedorService, IFornecedorRepository iFornecedorRepository) {
         this.fornecedorService = fornecedorService;
         this.iCategoriaProdutoRepository = iCategoriaProdutoRepository;
+        this.iFornecedorRepository = iFornecedorRepository;
     }
 
     public CategoriaProdutoDTO save(CategoriaProdutoDTO categoriaProdutoDTO) {
@@ -67,7 +73,7 @@ public class CategoriaProdutoService {
             throw new IllegalArgumentException("Codigo da categoria não deve ser nulo");
         }
 
-        if(!(CodeManager.isCodCategoriaValid(categoriaProdutoDTO.getCodCategoria()))){
+        if (!(CodeManager.isCodCategoriaValid(categoriaProdutoDTO.getCodCategoria()))) {
             throw new IllegalArgumentException("Código informado deve conter apenas números e ser menor ou igual a 3 digitos");
         }
 
@@ -148,10 +154,12 @@ public class CategoriaProdutoService {
 
         for (String[] linha : linhas) {
             String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
+            String cnpj = CnpjValidator.cleanCnpj(linhaTemp[4]);
+            Fornecedor fornecedor = iFornecedorRepository.findFirstByCnpj(cnpj);
+            if (!iCategoriaProdutoRepository.findByCode(linhaTemp[1]).isPresent()) {
+                save(CategoriaProdutoDTO.of(new CategoriaProduto(linhaTemp[1], linhaTemp[2], fornecedor)));
+            }
 
-            Fornecedor fornecedor = fornecedorService.findFornecedorById(Long.parseLong(linhaTemp[3]));
-
-            save(CategoriaProdutoDTO.of(new CategoriaProduto(linhaTemp[1], linhaTemp[2], fornecedor)));
         }
     }
 
@@ -165,7 +173,7 @@ public class CategoriaProdutoService {
         throw new IllegalArgumentException(String.format("ID %s não existe", id));
     }
 
-    public void exportFromData(HttpServletResponse response) throws IOException {
+    public void exportFromData(HttpServletResponse response) throws IOException, ParseException {
         String filename = "catprod.csv";
 
         response.setContentType("text/csv");
@@ -179,11 +187,23 @@ public class CategoriaProdutoService {
                 withEscapeChar(CSVWriter.DEFAULT_ESCAPE_CHARACTER).
                 withLineEnd(CSVWriter.DEFAULT_LINE_END).
                 build();
-        String headerCSV[] = {"ID_PRODUTO", "COD_PRODUTO", "NOME_PRODUTO", "ID_FORNECEDOR"};
+        String headerCSV[] = {"ID_CATEGORIA", "COD_CATEGORIA", "NOME_CATEGORIA", "RAZÃO_SOCIAL", "CNPJ_FORNECEDOR"};
         icsvWriter.writeNext(headerCSV);
         for (CategoriaProduto row : this.findAll()) {
-            icsvWriter.writeNext(new String[]{row.getId().toString(), row.getCodCategoria(), row.getNome(), Long.toString(row.getFornecedor().getId())});
+            icsvWriter.writeNext(new String[]{row.getId().toString(), row.getCodCategoria(),
+                    row.getNome(), row.getFornecedor().getRazaoSocial(),
+                    formatCnpj(row.getFornecedor().getCnpj())});
             LOGGER.info("Exportando categoria de produto de ID: {}", row.getId());
+        }
+    }
+
+    private String formatCnpj(String cnpj) throws ParseException {
+        try {
+            MaskFormatter mask = new MaskFormatter("###.###.###/####-##");
+            mask.setValueContainsLiteralCharacters(false);
+            return mask.valueToString(cnpj);
+        } catch (ParseException ex) {
+            throw new ParseException("erro so formatar cnpj", 2);
         }
     }
 }

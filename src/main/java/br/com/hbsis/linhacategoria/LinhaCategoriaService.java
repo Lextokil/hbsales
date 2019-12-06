@@ -2,12 +2,12 @@ package br.com.hbsis.linhacategoria;
 
 import br.com.hbsis.categoriaprodutos.CategoriaProduto;
 import br.com.hbsis.categoriaprodutos.CategoriaProdutoService;
+import br.com.hbsis.categoriaprodutos.ICategoriaProdutoRepository;
 import br.com.hbsis.util.CodeManager;
 import br.com.hbsis.util.Extension;
 import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
-import org.aspectj.apache.bcel.classfile.Code;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -29,11 +29,13 @@ public class LinhaCategoriaService {
 
     private final ILinhaCategoriaRepository iLinhaCategoriaRepository;
     private final CategoriaProdutoService categoriaProdutoService;
+    private final ICategoriaProdutoRepository iCategoriaProdutoRepository;
 
 
-    public LinhaCategoriaService(ILinhaCategoriaRepository iLinhaCategoriaRepository, CategoriaProdutoService categoriaProdutoService) {
+    public LinhaCategoriaService(ILinhaCategoriaRepository iLinhaCategoriaRepository, CategoriaProdutoService categoriaProdutoService, ICategoriaProdutoRepository iCategoriaProdutoRepository) {
         this.iLinhaCategoriaRepository = iLinhaCategoriaRepository;
         this.categoriaProdutoService = categoriaProdutoService;
+        this.iCategoriaProdutoRepository = iCategoriaProdutoRepository;
     }
 
     public LinhaCategoriaDTO save(LinhaCategoriaDTO linhaCategoriaDTO) {
@@ -156,12 +158,13 @@ public class LinhaCategoriaService {
                 withEscapeChar(CSVWriter.DEFAULT_ESCAPE_CHARACTER).
                 withLineEnd(CSVWriter.DEFAULT_LINE_END).
                 build();
-        String headerCSV[] = {"ID_LINHA_CAT", "COD_LINHA", "NOME_LINHA", "ID_CATEGORIA"};
+        String headerCSV[] = {"ID_LINHA_CAT", "COD_LINHA", "NOME_LINHA", "COD_CATEGORIA", "NOME_CATEGORIA"};
         icsvWriter.writeNext(headerCSV);
 
         for (LinhaCategoria row : this.findAll()) {
+
             icsvWriter.writeNext(new String[]{String.valueOf(row.getIdLinhaCategoria()), row.getCodLinha(), row.getNomeLinha(),
-                    String.valueOf(row.getCategoriaProduto())});
+                    row.getCategoriaProduto().getCodCategoria(), row.getCategoriaProduto().getNome()});
             LOGGER.info("Exportando Linha Categoria ID: {}", row.getIdLinhaCategoria());
         }
 
@@ -187,11 +190,20 @@ public class LinhaCategoriaService {
         for (String[] linha : linhas) {
             String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
 
-            CategoriaProduto categoriaProduto = categoriaProdutoService.findCategoriaProdutoById(Long.parseLong(linhaTemp[3]));
+            try{
+                CategoriaProduto categoriaProduto = iCategoriaProdutoRepository.findByCode(linhaTemp[3]).get();
+                if(!iLinhaCategoriaRepository.findByCode(linhaTemp[1]).isPresent()){
+                    LinhaCategoria linhaCategoria = new LinhaCategoria(linhaTemp[1], linhaTemp[2], categoriaProduto);
 
-            LinhaCategoria linhaCategoria = new LinhaCategoria(linhaTemp[1], linhaTemp[2], categoriaProduto);
+                    save(LinhaCategoriaDTO.of(linhaCategoria));
+                }
+            }catch (Exception e){
+                throw new IllegalArgumentException("Código do fornecedor inválido");
+            }
 
-            this.iLinhaCategoriaRepository.save(linhaCategoria);
+
+
+
         }
     }
 }
