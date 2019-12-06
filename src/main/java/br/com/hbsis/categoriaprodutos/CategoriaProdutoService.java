@@ -180,7 +180,7 @@ public class CategoriaProdutoService {
         String headerCSV[] = {"ID_PRODUTO", "COD_PRODUTO", "NOME_PRODUTO", "ID_FORNECEDOR"};
         icsvWriter.writeNext(headerCSV);
         for (CategoriaProduto row : this.findAll()) {
-            icsvWriter.writeNext(new String[]{row.getId().toString(), row.getCodCategoria(), row.getNome(), row.getFornecedor().toString()});
+            icsvWriter.writeNext(new String[]{row.getId().toString(), row.getCodCategoria(), row.getNome(), Long.toString(row.getFornecedor().getId())});
             LOGGER.info("Exportando categoria de produto de ID: {}", row.getId());
         }
     }
