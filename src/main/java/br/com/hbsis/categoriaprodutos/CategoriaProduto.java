@@ -14,10 +14,10 @@ public class CategoriaProduto {
     private Long id;
 
 
-    @Column(name = "cod_categoria", unique = true, nullable = false)
+    @Column(name = "cod_categoria", unique = true, nullable = false, length = 10)
     private String codCategoria;
 
-    @Column(name = "nome", unique = true, nullable = false, length = 100)
+    @Column(name = "nome", unique = true, nullable = false, length = 50)
     private String nome;
 
     @ManyToOne
