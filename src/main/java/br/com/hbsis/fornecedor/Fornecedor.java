@@ -6,118 +6,94 @@ import javax.persistence.*;
 @Table(name = "fornecedores")
 public class Fornecedor {
 
-    public Fornecedor() {
-    }
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id", updatable = false, insertable = false)
+	private Long id;
 
-    public Fornecedor(Long id, String razaoSocial, String cnpj, String nome, String endereco, String telefone, String email) {
-        this.id = id;
-        this.razaoSocial = razaoSocial;
-        this.cnpj = cnpj;
-        this.nome = nome;
-        this.endereco = endereco;
-        this.telefone = telefone;
-        this.email = email;
-    }
+	@Column(name = "razao_social", nullable = false, length = 100)
+	private String razaoSocial;
 
-    public Fornecedor(String razaoSocial, String cnpj, String nome, String endereco, String telefone, String email) {
-        this.razaoSocial = razaoSocial;
-        this.cnpj = cnpj;
-        this.nome = nome;
-        this.endereco = endereco;
-        this.telefone = telefone;
-        this.email = email;
-    }
+	@Column(name = "cnpj", nullable = false, unique = true, length = 14)
+	private String cnpj;
 
+	@Column(name = "nome", nullable = false, length = 100)
+	private String nomeFantasia;
 
+	@Column(name = "endereco", length = 100)
+	private String endereco;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Column(name = "email", length = 11)
+	private String emailContato;
 
-    @Column(name = "razao_social", unique = true, nullable = false, length = 100)
-    private String razaoSocial;
+	@Column(name = "telefone", length = 50)
+	private String telefoneContato;
 
-    @Column(name = "cnpj", unique = true, nullable = false, length = 50)
-    private String cnpj;
+	public Fornecedor() {
+	}
 
-    @Column(name = "nome",  nullable = false)
-    private String nome;
+	public Long getId() {
+		return id;
+	}
 
-    @Column(name = "endereco", nullable = false)
-    private String endereco;
+	public String getRazaoSocial() {
+		return razaoSocial;
+	}
 
-    @Column(name = "telefone", length = 36, nullable = false)
-    private String telefone;
+	public void setRazaoSocial(String razaoSocial) {
+		this.razaoSocial = razaoSocial;
+	}
 
-    @Column(name = "email", nullable = false)
-    private String email;
+	public String getCnpj() {
+		return cnpj;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public void setCnpj(String cnpj) {
+		this.cnpj = cnpj;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public String getNomeFantasia() {
+		return nomeFantasia;
+	}
 
-    public String getRazaoSocial() {
-        return razaoSocial;
-    }
+	public void setNomeFantasia(String nomeFantasia) {
+		this.nomeFantasia = nomeFantasia;
+	}
 
-    public void setRazaoSocial(String razaoSocial) {
-        this.razaoSocial = razaoSocial;
-    }
+	public String getEndereco() {
+		return endereco;
+	}
 
-    public String getCnpj() {
-        return cnpj;
-    }
+	public void setEndereco(String endereco) {
+		this.endereco = endereco;
+	}
 
-    public void setCnpj(String cnpj) {
-        this.cnpj = cnpj;
-    }
+	public String getEmailContato() {
+		return emailContato;
+	}
 
-    public String getNome() {
-        return nome;
-    }
+	public void setEmailContato(String contato) {
+		this.emailContato = contato;
+	}
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+	public String getTelefoneContato() {
+		return telefoneContato;
+	}
 
-    public String getEndereco() {
-        return endereco;
-    }
+	public void setTelefoneContato(String telefoneContato) {
+		this.telefoneContato = telefoneContato;
+	}
 
-    public void setEndereco(String endereco) {
-        this.endereco = endereco;
-    }
-
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    @Override
-    public String toString() {
-        return "Fornecedor{" +
-                "id=" + id +
-                ", Razao Social ='" + razaoSocial + '\'' +
-                ", CNPJ ='" + cnpj + '\'' +
-                ", Nome ='" + nome + '\'' +
-                ", Endereço ='" + endereco + '\'' +
-                ", Telefone ='" + telefone + '\'' +
-                ", E-mail ='" + email + '\'' +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "Fornecedor{" +
+				"id=" + id +
+				", razaoSocial='" + razaoSocial + '\'' +
+				", cnpj='" + cnpj + '\'' +
+				", nomeFantasia='" + nomeFantasia + '\'' +
+				", endereco='" + endereco + '\'' +
+				", emailContato='" + emailContato + '\'' +
+				", telefoneContato='" + telefoneContato + '\'' +
+				'}';
+	}
 }

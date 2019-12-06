@@ -38,10 +38,10 @@ public class FornecedorServiceTest {
 
         when(fornecedorMock.getRazaoSocial()).thenReturn(fornecedorDTO.getRazaoSocial());
         when(fornecedorMock.getCnpj()).thenReturn(fornecedorDTO.getCnpj());
-        when(fornecedorMock.getNome()).thenReturn(fornecedorDTO.getNome());
+        when(fornecedorMock.getNomeFantasia()).thenReturn(fornecedorDTO.getNomeFantasia());
         when(fornecedorMock.getEndereco()).thenReturn(fornecedorDTO.getEndereco());
-        when(fornecedorMock.getTelefone()).thenReturn(fornecedorDTO.getTelefone());
-        when(fornecedorMock.getEmail()).thenReturn(fornecedorDTO.getEmail());
+        when(fornecedorMock.getTelefoneContato()).thenReturn(fornecedorDTO.getTelefoneContato());
+        when(fornecedorMock.getEmailContato()).thenReturn(fornecedorDTO.getEmailContato());
 
         when(this.iFornecedorRepository.save(any())).thenReturn(fornecedorMock);
 
@@ -52,10 +52,10 @@ public class FornecedorServiceTest {
 
         assertTrue(StringUtils.isNoneEmpty(createdFornecedor.getRazaoSocial()), "Razao social não deve ser nulo");
         assertTrue(StringUtils.isNoneEmpty(createdFornecedor.getCnpj()), "cnpj não deve ser nulo");
-        assertTrue(StringUtils.isNoneEmpty(createdFornecedor.getNome()), "Nome não deve ser nulo");
+        assertTrue(StringUtils.isNoneEmpty(createdFornecedor.getNomeFantasia()), "Nome não deve ser nulo");
         assertTrue(StringUtils.isNoneEmpty(createdFornecedor.getEndereco()), "Endereço não deve ser nulo");
-        assertTrue(StringUtils.isNoneEmpty(createdFornecedor.getTelefone()), "Telefone não deve ser nulo");
-        assertTrue(StringUtils.isNoneEmpty(createdFornecedor.getEmail()), "email não deve ser nulo");
+        assertTrue(StringUtils.isNoneEmpty(createdFornecedor.getNomeFantasia()), "Telefone não deve ser nulo");
+        assertTrue(StringUtils.isNoneEmpty(createdFornecedor.getEmailContato()), "email não deve ser nulo");
 
     }
 

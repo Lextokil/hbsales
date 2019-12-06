@@ -1,4 +1,4 @@
-package br.com.hbsis.categoriaProdutos;
+package br.com.hbsis.categoriaprodutos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
 
@@ -14,10 +14,10 @@ public class CategoriaProduto {
     private Long id;
 
 
-    @Column(name = "cod_categoria", unique = true, nullable = false)
+    @Column(name = "cod_categoria", unique = true, nullable = false, length = 10)
     private String codCategoria;
 
-    @Column(name = "nome", unique = true, nullable = false, length = 100)
+    @Column(name = "nome", unique = true, nullable = false, length = 50)
     private String nome;
 
     @ManyToOne
@@ -33,14 +33,6 @@ public class CategoriaProduto {
         this.codCategoria = codCategoria;
         this.nome = nome;
         this.fornecedor= fornecedor;
-    }
-
-
-    public CategoriaProduto(Long id, String codCategoria, String nome,  Fornecedor fornecedor) {
-        this.id = id;
-        this.codCategoria = codCategoria;
-        this.nome = nome;
-        this.fornecedor = fornecedor;
     }
 
 

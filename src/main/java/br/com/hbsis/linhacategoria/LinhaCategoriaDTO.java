@@ -1,4 +1,4 @@
-package br.com.hbsis.linhaCategoria;
+package br.com.hbsis.linhacategoria;
 
 public class LinhaCategoriaDTO {
 
@@ -7,14 +7,10 @@ public class LinhaCategoriaDTO {
     private Long categoriaProduto;
     private String nomeLinha;
 
+
     public LinhaCategoriaDTO() {
     }
 
-    public LinhaCategoriaDTO(String codLinha, String nomeLinha, Long categoriaProduto) {
-        this.codLinha = codLinha;
-        this.categoriaProduto = categoriaProduto;
-        this.nomeLinha = nomeLinha;
-    }
 
     public LinhaCategoriaDTO(Long idLinhaCategoria, String codLinha, String nomeLinha, Long categoriaProduto) {
         this.idLinhaCategoria = idLinhaCategoria;
@@ -54,6 +50,7 @@ public class LinhaCategoriaDTO {
     public void setNomeLinha(String nomeLinha) {
         this.nomeLinha = nomeLinha;
     }
+
     public static LinhaCategoriaDTO of(LinhaCategoria linhaCategoria) {
         return new LinhaCategoriaDTO(
                         linhaCategoria.getIdLinhaCategoria(),

@@ -1,0 +1,1 @@
+ALTER TABLE fornecedores DROP CONSTRAINT UK_cnpj;

@@ -1,7 +1,7 @@
-package br.com.hbsis.linhaCategoria;
+package br.com.hbsis.linhacategoria;
 
-import br.com.hbsis.categoriaProdutos.CategoriaProduto;
-import br.com.hbsis.categoriaProdutos.CategoriaProdutoService;
+import br.com.hbsis.categoriaprodutos.CategoriaProduto;
+import br.com.hbsis.categoriaprodutos.CategoriaProdutoService;
 import br.com.hbsis.util.Extension;
 import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;

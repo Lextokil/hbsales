@@ -1,8 +1,6 @@
-package br.com.hbsis.periodoVendas;
+package br.com.hbsis.periodovendas;
 
 import br.com.hbsis.fornecedor.FornecedorService;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.sun.org.apache.bcel.internal.generic.RETURN;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

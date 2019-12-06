@@ -9,10 +9,6 @@ public class FuncionarioDTO {
     public FuncionarioDTO() {
     }
 
-    public FuncionarioDTO(String nome, String email) {
-        this.nome = nome;
-        this.email = email;
-    }
 
     public FuncionarioDTO(Long id, String nome, String email) {
         this.id = id;

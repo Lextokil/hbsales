@@ -1,7 +1,8 @@
-package br.com.hbsis.categoriaProdutos;
+package br.com.hbsis.categoriaprodutos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
 import br.com.hbsis.fornecedor.FornecedorService;
+import br.com.hbsis.util.CodCategoriaGenerator;
 import br.com.hbsis.util.Extension;
 import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;
@@ -37,6 +38,7 @@ public class CategoriaProdutoService {
         Fornecedor fornecedor = fornecedorService.findFornecedorById(categoriaProdutoDTO.getFornecedor());
 
         this.validate(categoriaProdutoDTO);
+
         LOGGER.info("Salvando Produto");
         LOGGER.debug("Produto: {}", categoriaProdutoDTO);
         LOGGER.debug("Fornecedor {}", categoriaProdutoDTO.getFornecedor());
@@ -46,6 +48,7 @@ public class CategoriaProdutoService {
                 categoriaProdutoDTO.getCodCategoria(),
                 categoriaProdutoDTO.getNome(),
                 fornecedor);
+        categoriaProduto.setCodCategoria(CodCategoriaGenerator.codGenerator(categoriaProduto));
 
 
         categoriaProduto = this.iCategoriaProdutoRepository.save(categoriaProduto);
@@ -62,6 +65,10 @@ public class CategoriaProdutoService {
 
         if (StringUtils.isEmpty(categoriaProdutoDTO.getCodCategoria())) {
             throw new IllegalArgumentException("Codigo da categoria não deve ser nulo");
+        }
+
+        if(!(CodCategoriaGenerator.isCodValid(categoriaProdutoDTO.getCodCategoria()))){
+            throw new IllegalArgumentException("Código informado deve conter apenas números e ser menor ou igual a 3 digitos");
         }
 
         if (StringUtils.isEmpty(categoriaProdutoDTO.getNome())) {
@@ -97,7 +104,7 @@ public class CategoriaProdutoService {
 
         if (produtoExistenteOptional.isPresent()) {
             CategoriaProduto categoriaProdutoExistente = produtoExistenteOptional.get();
-
+            this.validate(categoriaProdutoDTO);
             LOGGER.info("Atualizando produto... id: [{}]", categoriaProdutoExistente.getId());
             LOGGER.debug("Payload: {}", categoriaProdutoDTO);
             LOGGER.debug("Produto Existente: {}", categoriaProdutoExistente);
@@ -105,6 +112,7 @@ public class CategoriaProdutoService {
             categoriaProdutoExistente.setCodCategoria(categoriaProdutoDTO.getCodCategoria());
             categoriaProdutoExistente.setNome(categoriaProdutoDTO.getNome());
             categoriaProdutoExistente.setFornecedor(fornecedor);
+            categoriaProdutoExistente.setCodCategoria(CodCategoriaGenerator.codGenerator(categoriaProdutoExistente));
 
             categoriaProdutoExistente = this.iCategoriaProdutoRepository.save(categoriaProdutoExistente);
 
@@ -141,7 +149,7 @@ public class CategoriaProdutoService {
 
             Fornecedor fornecedor = fornecedorService.findFornecedorById(Long.parseLong(linhaTemp[3]));
 
-            iCategoriaProdutoRepository.save(new CategoriaProduto(linhaTemp[1], linhaTemp[2], fornecedor));
+            save(CategoriaProdutoDTO.of(new CategoriaProduto(linhaTemp[1], linhaTemp[2], fornecedor)));
         }
     }
 
@@ -172,7 +180,7 @@ public class CategoriaProdutoService {
         String headerCSV[] = {"ID_PRODUTO", "COD_PRODUTO", "NOME_PRODUTO", "ID_FORNECEDOR"};
         icsvWriter.writeNext(headerCSV);
         for (CategoriaProduto row : this.findAll()) {
-            icsvWriter.writeNext(new String[]{row.getId().toString(), row.getCodCategoria(), row.getNome(), row.getFornecedor().toString()});
+            icsvWriter.writeNext(new String[]{row.getId().toString(), row.getCodCategoria(), row.getNome(), Long.toString(row.getFornecedor().getId())});
             LOGGER.info("Exportando categoria de produto de ID: {}", row.getId());
         }
     }
