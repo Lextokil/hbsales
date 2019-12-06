@@ -2,7 +2,7 @@ package br.com.hbsis.categoriaprodutos;
 
 import br.com.hbsis.fornecedor.Fornecedor;
 import br.com.hbsis.fornecedor.FornecedorService;
-import br.com.hbsis.util.CodCategoriaGenerator;
+import br.com.hbsis.util.CodeManager;
 import br.com.hbsis.util.Extension;
 import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;
@@ -48,7 +48,7 @@ public class CategoriaProdutoService {
                 categoriaProdutoDTO.getCodCategoria(),
                 categoriaProdutoDTO.getNome(),
                 fornecedor);
-        categoriaProduto.setCodCategoria(CodCategoriaGenerator.codGenerator(categoriaProduto));
+        categoriaProduto.setCodCategoria(CodeManager.codCategoriaGenerator(categoriaProduto));
 
 
         categoriaProduto = this.iCategoriaProdutoRepository.save(categoriaProduto);
@@ -67,7 +67,7 @@ public class CategoriaProdutoService {
             throw new IllegalArgumentException("Codigo da categoria não deve ser nulo");
         }
 
-        if(!(CodCategoriaGenerator.isCodValid(categoriaProdutoDTO.getCodCategoria()))){
+        if(!(CodeManager.isCodCategoriaValid(categoriaProdutoDTO.getCodCategoria()))){
             throw new IllegalArgumentException("Código informado deve conter apenas números e ser menor ou igual a 3 digitos");
         }
 
@@ -109,10 +109,12 @@ public class CategoriaProdutoService {
             LOGGER.debug("Payload: {}", categoriaProdutoDTO);
             LOGGER.debug("Produto Existente: {}", categoriaProdutoExistente);
 
+            validate(categoriaProdutoDTO);
+
             categoriaProdutoExistente.setCodCategoria(categoriaProdutoDTO.getCodCategoria());
             categoriaProdutoExistente.setNome(categoriaProdutoDTO.getNome());
             categoriaProdutoExistente.setFornecedor(fornecedor);
-            categoriaProdutoExistente.setCodCategoria(CodCategoriaGenerator.codGenerator(categoriaProdutoExistente));
+            categoriaProdutoExistente.setCodCategoria(CodeManager.codCategoriaGenerator(categoriaProdutoExistente));
 
             categoriaProdutoExistente = this.iCategoriaProdutoRepository.save(categoriaProdutoExistente);
 

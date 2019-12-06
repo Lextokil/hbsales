@@ -2,10 +2,12 @@ package br.com.hbsis.linhacategoria;
 
 import br.com.hbsis.categoriaprodutos.CategoriaProduto;
 import br.com.hbsis.categoriaprodutos.CategoriaProdutoService;
+import br.com.hbsis.util.CodeManager;
 import br.com.hbsis.util.Extension;
 import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.aspectj.apache.bcel.classfile.Code;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -48,7 +50,7 @@ public class LinhaCategoriaService {
                 linhaCategoriaDTO.getNomeLinha(),
                 categoriaProduto
         );
-
+        linhaCategoria.setCodLinha(CodeManager.codLinhaGenerator(linhaCategoriaDTO));
 
         linhaCategoria = this.iLinhaCategoriaRepository.save(linhaCategoria);
 
@@ -66,8 +68,11 @@ public class LinhaCategoriaService {
             throw new IllegalArgumentException("Nome da linha de categoria não deve ser nulo");
         }
 
-        if (StringUtils.isEmpty(linhaCategoriaDTO.getCodLinha())) {
-            throw new IllegalArgumentException("Codigo da linha não deve ser nula/vazia");
+        if (linhaCategoriaDTO.getCodLinha().length() > 10) {
+            throw new IllegalArgumentException("Codigo da linha não deve conter mais de 10 caracteres");
+        }
+        if(StringUtils.isEmpty(linhaCategoriaDTO.getCodLinha())){
+            throw new IllegalArgumentException("Codigo da linha não deve ser nulo/vazio");
         }
 
         if (StringUtils.isEmpty(linhaCategoriaDTO.getCategoriaProduto().toString())) {
@@ -110,16 +115,20 @@ public class LinhaCategoriaService {
 
         if (linhaCategoriaOptional.isPresent()) {
             LinhaCategoria linhaCategoriaExistente = linhaCategoriaOptional.get();
-            CategoriaProduto categoriaProduto = categoriaProdutoService.findCategoriaProdutoById(linhaCategoriaDTO.getCategoriaProduto());
 
+            validate(linhaCategoriaDTO);
+
+            CategoriaProduto categoriaProduto = categoriaProdutoService.findCategoriaProdutoById(linhaCategoriaDTO.getCategoriaProduto());
 
             LOGGER.info("Atualizando produto... id: [{}]", linhaCategoriaExistente.getIdLinhaCategoria());
             LOGGER.debug("Payload: {}", linhaCategoriaDTO);
             LOGGER.debug("Produto Existente: {}", linhaCategoriaExistente);
 
+
             linhaCategoriaExistente.setCodLinha(linhaCategoriaDTO.getCodLinha());
             linhaCategoriaExistente.setCategoriaProduto(categoriaProduto);
             linhaCategoriaExistente.setNomeLinha(linhaCategoriaDTO.getNomeLinha());
+            linhaCategoriaExistente.setCodLinha(CodeManager.codLinhaGenerator(linhaCategoriaDTO));
 
             linhaCategoriaExistente = this.iLinhaCategoriaRepository.save(linhaCategoriaExistente);
 
@@ -184,6 +193,5 @@ public class LinhaCategoriaService {
 
             this.iLinhaCategoriaRepository.save(linhaCategoria);
         }
-
     }
 }
