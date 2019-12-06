@@ -36,9 +36,9 @@ public class PedidoRest {
     }
 
     @RequestMapping("/all")
-    public List<Pedido> findAll() {
+    public List<PedidoDTO> findAll() {
 
-        List<Pedido> pedidos = pedidoService.findAll();
+        List<PedidoDTO> pedidos = pedidoService.findAll();
         return pedidos;
     }
 

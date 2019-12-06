@@ -11,18 +11,17 @@ public class ItemPedido {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_pedido", referencedColumnName = "id")
     private Pedido pedido;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "id_produto", referencedColumnName = "id")
     private Produto produto;
 
-    @Column(name = "quantidade", nullable = false)
+    @Column(name = "quantidade")
     private int quantidade;
 
     public ItemPedido() {

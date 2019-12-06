@@ -24,7 +24,7 @@ public class PedidoDTO {
 
     public static PedidoDTO of (Pedido pedido){
         Set<ItemPedidoDTO> ipDTO = new HashSet<>();
-        for (ItemPedido ip: pedido.getItemPedidoSet()) {
+        for (ItemPedido ip: pedido.getItensPedido()) {
 
            ipDTO.add(ItemPedidoDTO.of(ip));
         }

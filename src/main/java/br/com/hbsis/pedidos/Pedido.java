@@ -1,7 +1,9 @@
 package br.com.hbsis.pedidos;
 
-import br.com.hbsis.fornecedor.Fornecedor;
 import br.com.hbsis.itempedido.ItemPedido;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -16,22 +18,17 @@ public class Pedido {
     @Column(name = "id")
     private Long id;
 
+    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
+    @JoinColumn(name = "id_pedido", referencedColumnName = "id")
+    private Set<ItemPedido> itensPedido = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name="item_pedido",
-            joinColumns = @JoinColumn( name="id"),
-            inverseJoinColumns = @JoinColumn( name="id_pedido")
-    )
-    private Set<ItemPedido> itensPedido;
-
-    @Column(name = "valor_total", nullable = false)
+    @Column(name = "valor_total")
     private double valorTotal;
 
     public Pedido() {
     }
 
-    public Pedido( Set<ItemPedido> itemPedidoSet, double valorTotal) {
+    public Pedido(Set<ItemPedido> itemPedidoSet, double valorTotal) {
         this.itensPedido = itemPedidoSet;
         this.valorTotal = valorTotal;
     }
@@ -48,12 +45,12 @@ public class Pedido {
         this.id = id;
     }
 
-    public Set<ItemPedido> getItemPedidoSet() {
+    public Set<ItemPedido> getItensPedido() {
         return itensPedido;
     }
 
-    public void setItemPedidoSet(Set<ItemPedido> itemPedidoSet) {
-        this.itensPedido = itemPedidoSet;
+    public void setItensPedido(Set<ItemPedido> itensPedido) {
+        this.itensPedido = itensPedido;
     }
 
     public double getValorTotal() {

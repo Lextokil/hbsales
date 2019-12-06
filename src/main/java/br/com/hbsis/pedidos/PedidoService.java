@@ -10,11 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class PedidoService {
@@ -22,19 +18,16 @@ public class PedidoService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PedidoService.class);
 
     private final IPedidoRepository iPedidoRepository;
-    private final FornecedorService fornecedorService;
     private final ProdutoService produtoService;
     private final ItemPedidoService itemPedidoService;
 
-    public PedidoService(IPedidoRepository iPedidoRepository, FornecedorService fornecedorService,
-                         ProdutoService produtoService, ItemPedidoService itemPedidoService) {
+    public PedidoService(IPedidoRepository iPedidoRepository, ProdutoService produtoService, ItemPedidoService itemPedidoService) {
         this.iPedidoRepository = iPedidoRepository;
-        this.fornecedorService = fornecedorService;
         this.produtoService = produtoService;
         this.itemPedidoService = itemPedidoService;
     }
 
-    //@Transactional
+
     public PedidoDTO save(PedidoDTO pedidoDTO) {
 
         this.validate(pedidoDTO);
@@ -43,19 +36,17 @@ public class PedidoService {
 
         Set<ItemPedido> itemPedidoCompletos = this.parseToItemPedido(pedidoDTO.getItemPedidoDTO());
 
-
-        Double valorTotal = valorTotalPedido(itemPedidoCompletos);
+        double valorTotal = valorTotalPedido(itemPedidoCompletos);
 
         Pedido pedido = new Pedido(valorTotal);
-        for (ItemPedido itemPedidoCompleto : itemPedidoCompletos) {
-            itemPedidoCompleto.setPedido(pedido);
+        pedido.setItensPedido(itemPedidoCompletos);
+
+        for (ItemPedido itemPedido : pedido.getItensPedido()) {
+            itemPedido.setPedido(pedido);
         }
-        pedido.setItemPedidoSet(itemPedidoCompletos);
 
         pedido = this.iPedidoRepository.save(pedido);
-
-        //pedido.setItemPedidoSet(itemPedidoCompletos);
-        return pedidoDTO.of(pedido);
+        return PedidoDTO.of(pedido);
     }
 
     public double valorTotalPedido(Set<ItemPedido> itensPedido) {
@@ -69,20 +60,22 @@ public class PedidoService {
     }
 
 
-    public Set<ItemPedido> saveItensPedido(Set<ItemPedido> itensPedido) {
-        //itensPedido.forEach(ip -> ip.setPedido(pedido));
+    public Set<ItemPedido> saveItensPedido(Set<ItemPedido> itensPedido, Pedido pedido) {
+        itensPedido.forEach(ip -> ip.setPedido(pedido));
         return this.itemPedidoService.saveAll(itensPedido);
     }
 
     public Set<ItemPedido> parseToItemPedido(Set<ItemPedidoDTO> itemPedidosDTO) {
-        Set<ItemPedido> ips = new HashSet<>();
+        Set<ItemPedido> itemPedidoSet = new HashSet<>();
+
         for (ItemPedidoDTO ipDTO : itemPedidosDTO) {
-            ItemPedido ip = new ItemPedido();
-            ip.setProduto(produtoService.findProdutoById(ipDTO.getIdProduto()));
-            ip.setQuantidade(ipDTO.getQuantidade());
-            ips.add(ip);
+            ItemPedido itemPedido = new ItemPedido();
+            itemPedido.setProduto(produtoService.findProdutoById(ipDTO.getIdProduto()));
+            itemPedido.setQuantidade(ipDTO.getQuantidade());
+            itemPedidoSet.add(itemPedido);
         }
-        return ips;
+
+        return itemPedidoSet;
     }
 
     private void validate(PedidoDTO pedidoDTO) {
@@ -109,11 +102,13 @@ public class PedidoService {
     }
 
 
-    public List<Pedido> findAll() {
+    public List<PedidoDTO> findAll() {
 
         List<Pedido> pedidos = iPedidoRepository.findAll();
+        List<PedidoDTO> pedidosDTO = new ArrayList<>();
+        pedidos.forEach(pedido -> pedidosDTO.add(PedidoDTO.of(pedido)));
 
-        return pedidos;
+        return pedidosDTO;
     }
 
     public PedidoDTO update(PedidoDTO pedidoDTO, Long id) {
@@ -127,7 +122,7 @@ public class PedidoService {
             LOGGER.debug("Payload: {}", pedidoExistente.toString());
 
 
-            pedidoExistente.setItemPedidoSet(this.parseToItemPedido(pedidoDTO.getItemPedidoDTO()));
+            pedidoExistente.setItensPedido((this.parseToItemPedido(pedidoDTO.getItemPedidoDTO())));
             pedidoExistente.setValorTotal(pedidoDTO.getValorTotal());
 
             pedidoExistente = this.iPedidoRepository.save(pedidoExistente);

@@ -5,53 +5,57 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/fornecedores")
 public class FornecedorRest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FornecedorRest.class);
 
-    private final FornecedorService fornecedorService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(FornecedorRest.class);
 
-    @Autowired
-    public FornecedorRest(FornecedorService fornecedorService){
-        this.fornecedorService = fornecedorService;
-    }
+	private final FornecedorService fornecedorService;
 
-    @PostMapping
-    public FornecedorDTO save(@RequestBody FornecedorDTO fornecedorDTO){
-        LOGGER.info("Recebendo solicitação de persistência de Fornecedor...");
-        LOGGER.debug("Payaload: {}", fornecedorDTO);
-       return this.fornecedorService.save(fornecedorDTO);
-    }
+	@Autowired
+	public FornecedorRest(FornecedorService fornecedorService) {
+		this.fornecedorService = fornecedorService;
+	}
 
-    @GetMapping("/{id}")
-    public FornecedorDTO find(@PathVariable("id") Long id) {
+	@PostMapping
+	public FornecedorDTO save(@Valid @RequestBody FornecedorDTO fornecedorDTO) {
+		LOGGER.info("Recebendo requisição para persistência de fornecedor...");
+		LOGGER.debug("Payload {}", fornecedorDTO);
 
-        LOGGER.info("Recebendo find by ID... id: [{}]", id);
+		return this.fornecedorService.save(fornecedorDTO);
+	}
 
-        return this.fornecedorService.findById(id);
-    }
-    @RequestMapping("/all")
-    public List<Fornecedor> findFornecedores() {
+	@GetMapping("/all")
+	public List<FornecedorDTO> findAll() {
 
-        List<Fornecedor> fornecedores = fornecedorService.findAll();
-        return fornecedores;
-    }
+		LOGGER.info("Recebendo consulta ");
 
-    @PutMapping("/{id}")
-    public FornecedorDTO udpate(@PathVariable("id") Long id, @RequestBody FornecedorDTO fornecedorDTO) {
-        LOGGER.info("Recebendo Update para fornecedor de ID: {}", id);
-        LOGGER.debug("Payload: {}", fornecedorDTO);
+		return this.fornecedorService.findAll();
+	}
+	@GetMapping("{id}")
+	public FornecedorDTO findById(@PathVariable Long id) {
 
-        return this.fornecedorService.update(fornecedorDTO, id);
-    }
+		LOGGER.info("Recebendo consulta para o id [{}]", id);
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") Long id) {
-        LOGGER.info("Recebendo Delete para fornecedor de ID: {}", id);
+		return this.fornecedorService.findById(id);
+	}
 
-        this.fornecedorService.delete(id);
-    }
+	@PutMapping("{id}")
+	public FornecedorDTO update(@PathVariable Long id, @RequestBody FornecedorDTO fornecedorDTO) {
+
+		LOGGER.info("Recebendo requisição para alteração do fornecedor...");
+		LOGGER.debug("Payload: {}", fornecedorDTO);
+
+		return this.fornecedorService.update(id, fornecedorDTO);
+	}
+	@DeleteMapping("/{id}")
+	public void delete(@PathVariable("id") Long id) {
+		LOGGER.info("Recebendo Delete para fornecedor de ID: {}", id);
+
+		this.fornecedorService.delete(id);
+	}
 }
