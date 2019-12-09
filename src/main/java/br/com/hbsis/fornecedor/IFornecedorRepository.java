@@ -8,9 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-interface IFornecedorRepository extends JpaRepository<Fornecedor, Long> {
+public interface IFornecedorRepository extends JpaRepository<Fornecedor, Long> {
 
-	@Query(value = "select * from fornecedores where cnpj like '%:cnpj%'", nativeQuery = true)
-	List<Fornecedor> findFirstByCnpj(@Param("cnpj") String cnpj);
+	Fornecedor findFirstByCnpj(@Param("cnpj") String cnpj);
 
 }

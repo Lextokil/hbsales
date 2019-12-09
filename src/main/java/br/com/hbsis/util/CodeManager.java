@@ -1,11 +1,13 @@
 package br.com.hbsis.util;
 
 import br.com.hbsis.categoriaprodutos.CategoriaProduto;
+import br.com.hbsis.linhacategoria.LinhaCategoria;
+import br.com.hbsis.linhacategoria.LinhaCategoriaDTO;
 import org.apache.commons.lang.StringUtils;
 
-public class CodCategoriaGenerator {
+public class CodeManager {
 
-    public static String codGenerator(CategoriaProduto categoriaProduto) {
+    public static String codCategoriaGenerator(CategoriaProduto categoriaProduto) {
 
         String cnpj = categoriaProduto.getFornecedor().getCnpj();
         cnpj = cnpj.substring(cnpj.length() - 4);
@@ -16,7 +18,7 @@ public class CodCategoriaGenerator {
 
     }
 
-    public static boolean isCodValid(String codigo) {
+    public static boolean isCodCategoriaValid(String codigo) {
         try {
             if (!(codigo.length() > 3)) {
                 Double.parseDouble(codigo);
@@ -30,9 +32,19 @@ public class CodCategoriaGenerator {
         }
     }
 
-    public static String generateCode(String code){
+
+    public static String generateCode(String code) {
         String codeGenerated = StringUtils.leftPad(code, 10, "0");
-        return  codeGenerated.toUpperCase();
+        return codeGenerated.toUpperCase();
+
+    }
+    public static String codLinhaGenerator(LinhaCategoriaDTO linhaCategoriaDTO){
+        String code = linhaCategoriaDTO.getCodLinha();
+        code = code.replaceAll("[^a-zA-Z0-9]+","");
+        code = StringUtils.leftPad(code, 10, "0");
+
+        return code.toUpperCase();
+
     }
 
 }

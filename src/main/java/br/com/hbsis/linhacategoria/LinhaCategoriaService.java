@@ -2,6 +2,8 @@ package br.com.hbsis.linhacategoria;
 
 import br.com.hbsis.categoriaprodutos.CategoriaProduto;
 import br.com.hbsis.categoriaprodutos.CategoriaProdutoService;
+import br.com.hbsis.categoriaprodutos.ICategoriaProdutoRepository;
+import br.com.hbsis.util.CodeManager;
 import br.com.hbsis.util.Extension;
 import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;
@@ -27,11 +29,13 @@ public class LinhaCategoriaService {
 
     private final ILinhaCategoriaRepository iLinhaCategoriaRepository;
     private final CategoriaProdutoService categoriaProdutoService;
+    private final ICategoriaProdutoRepository iCategoriaProdutoRepository;
 
 
-    public LinhaCategoriaService(ILinhaCategoriaRepository iLinhaCategoriaRepository, CategoriaProdutoService categoriaProdutoService) {
+    public LinhaCategoriaService(ILinhaCategoriaRepository iLinhaCategoriaRepository, CategoriaProdutoService categoriaProdutoService, ICategoriaProdutoRepository iCategoriaProdutoRepository) {
         this.iLinhaCategoriaRepository = iLinhaCategoriaRepository;
         this.categoriaProdutoService = categoriaProdutoService;
+        this.iCategoriaProdutoRepository = iCategoriaProdutoRepository;
     }
 
     public LinhaCategoriaDTO save(LinhaCategoriaDTO linhaCategoriaDTO) {
@@ -48,7 +52,7 @@ public class LinhaCategoriaService {
                 linhaCategoriaDTO.getNomeLinha(),
                 categoriaProduto
         );
-
+        linhaCategoria.setCodLinha(CodeManager.codLinhaGenerator(linhaCategoriaDTO));
 
         linhaCategoria = this.iLinhaCategoriaRepository.save(linhaCategoria);
 
@@ -66,8 +70,11 @@ public class LinhaCategoriaService {
             throw new IllegalArgumentException("Nome da linha de categoria não deve ser nulo");
         }
 
-        if (StringUtils.isEmpty(linhaCategoriaDTO.getCodLinha())) {
-            throw new IllegalArgumentException("Codigo da linha não deve ser nula/vazia");
+        if (linhaCategoriaDTO.getCodLinha().length() > 10) {
+            throw new IllegalArgumentException("Codigo da linha não deve conter mais de 10 caracteres");
+        }
+        if(StringUtils.isEmpty(linhaCategoriaDTO.getCodLinha())){
+            throw new IllegalArgumentException("Codigo da linha não deve ser nulo/vazio");
         }
 
         if (StringUtils.isEmpty(linhaCategoriaDTO.getCategoriaProduto().toString())) {
@@ -110,16 +117,20 @@ public class LinhaCategoriaService {
 
         if (linhaCategoriaOptional.isPresent()) {
             LinhaCategoria linhaCategoriaExistente = linhaCategoriaOptional.get();
-            CategoriaProduto categoriaProduto = categoriaProdutoService.findCategoriaProdutoById(linhaCategoriaDTO.getCategoriaProduto());
 
+            validate(linhaCategoriaDTO);
+
+            CategoriaProduto categoriaProduto = categoriaProdutoService.findCategoriaProdutoById(linhaCategoriaDTO.getCategoriaProduto());
 
             LOGGER.info("Atualizando produto... id: [{}]", linhaCategoriaExistente.getIdLinhaCategoria());
             LOGGER.debug("Payload: {}", linhaCategoriaDTO);
             LOGGER.debug("Produto Existente: {}", linhaCategoriaExistente);
 
+
             linhaCategoriaExistente.setCodLinha(linhaCategoriaDTO.getCodLinha());
             linhaCategoriaExistente.setCategoriaProduto(categoriaProduto);
             linhaCategoriaExistente.setNomeLinha(linhaCategoriaDTO.getNomeLinha());
+            linhaCategoriaExistente.setCodLinha(CodeManager.codLinhaGenerator(linhaCategoriaDTO));
 
             linhaCategoriaExistente = this.iLinhaCategoriaRepository.save(linhaCategoriaExistente);
 
@@ -147,12 +158,13 @@ public class LinhaCategoriaService {
                 withEscapeChar(CSVWriter.DEFAULT_ESCAPE_CHARACTER).
                 withLineEnd(CSVWriter.DEFAULT_LINE_END).
                 build();
-        String headerCSV[] = {"ID_LINHA_CAT", "COD_LINHA", "NOME_LINHA", "ID_CATEGORIA"};
+        String headerCSV[] = {"ID_LINHA_CAT", "COD_LINHA", "NOME_LINHA", "COD_CATEGORIA", "NOME_CATEGORIA"};
         icsvWriter.writeNext(headerCSV);
 
         for (LinhaCategoria row : this.findAll()) {
+
             icsvWriter.writeNext(new String[]{String.valueOf(row.getIdLinhaCategoria()), row.getCodLinha(), row.getNomeLinha(),
-                    String.valueOf(row.getCategoriaProduto())});
+                    row.getCategoriaProduto().getCodCategoria(), row.getCategoriaProduto().getNome()});
             LOGGER.info("Exportando Linha Categoria ID: {}", row.getIdLinhaCategoria());
         }
 
@@ -178,12 +190,20 @@ public class LinhaCategoriaService {
         for (String[] linha : linhas) {
             String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
 
-            CategoriaProduto categoriaProduto = categoriaProdutoService.findCategoriaProdutoById(Long.parseLong(linhaTemp[3]));
+            try{
+                CategoriaProduto categoriaProduto = iCategoriaProdutoRepository.findByCode(linhaTemp[3]).get();
+                if(!iLinhaCategoriaRepository.findByCode(linhaTemp[1]).isPresent()){
+                    LinhaCategoria linhaCategoria = new LinhaCategoria(linhaTemp[1], linhaTemp[2], categoriaProduto);
 
-            LinhaCategoria linhaCategoria = new LinhaCategoria(linhaTemp[1], linhaTemp[2], categoriaProduto);
+                    save(LinhaCategoriaDTO.of(linhaCategoria));
+                }
+            }catch (Exception e){
+                throw new IllegalArgumentException("Código do fornecedor inválido");
+            }
 
-            this.iLinhaCategoriaRepository.save(linhaCategoria);
+
+
+
         }
-
     }
 }

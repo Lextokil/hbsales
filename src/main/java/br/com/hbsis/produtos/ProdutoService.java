@@ -4,7 +4,7 @@ import br.com.hbsis.categoriaprodutos.CategoriaProduto;
 import br.com.hbsis.fornecedor.Fornecedor;
 import br.com.hbsis.linhacategoria.LinhaCategoria;
 import br.com.hbsis.linhacategoria.LinhaCategoriaService;
-import br.com.hbsis.util.CodCategoriaGenerator;
+import br.com.hbsis.util.CodeManager;
 import br.com.hbsis.util.DateValidator;
 import br.com.hbsis.util.Extension;
 import br.com.hbsis.util.UnidadeMedida;
@@ -51,7 +51,7 @@ public class ProdutoService {
         LOGGER.info("Salvando Produto");
         LOGGER.debug("Produto: {}", produtoDTO);
 
-        produtoDTO.setCodProduto(CodCategoriaGenerator.generateCode(produtoDTO.getCodProduto()));
+        produtoDTO.setCodProduto(CodeManager.generateCode(produtoDTO.getCodProduto()));
 
 
         Produto produto = new Produto(
@@ -146,7 +146,7 @@ public class ProdutoService {
             Produto produtoExistente = produtoOptional.get();
             LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(produtoDTO.getLinhaCategoria());
             validate(produtoDTO);
-            produtoDTO.setCodProduto(CodCategoriaGenerator.generateCode(produtoDTO.getCodProduto()));
+            produtoDTO.setCodProduto(CodeManager.generateCode(produtoDTO.getCodProduto()));
 
 
             LOGGER.info("Atualizando produto... id: [{}]", produtoExistente.getId());
@@ -236,16 +236,16 @@ public class ProdutoService {
 
         List<String[]> linhas = csvReader.readAll();
 
-        for (String[] linha : linhas) {
+        /*for (String[] linha : linhas) {
             String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
 
             LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(Long.parseLong(linhaTemp[7]));
 
-            /*Produto produto = new Produto(linhaTemp[1], linhaTemp[2], Double.parseDouble(linhaTemp[3]), Integer.parseInt(linhaTemp[4]),
+            Produto produto = new Produto(linhaTemp[1], linhaTemp[2], Double.parseDouble(linhaTemp[3]), Integer.parseInt(linhaTemp[4]),
                     Double.parseDouble(linhaTemp[5]), linhaTemp[6], linhaCategoria);
 
-            this.iProdutoRepository.save(produto);*/
-        }
+            this.iProdutoRepository.save(produto);
+        }*/
 
     }
 
