@@ -1,0 +1,5 @@
+CREATE TABLE funcionarios(
+    id  BIGINT IDENTITY (1,1) NOT NULL PRIMARY KEY,
+    nome VARCHAR (255) NOT NULL,
+    email VARCHAR (255)  NOT NULL
+);

@@ -22,7 +22,7 @@ class UsuarioServiceTest {
 
 	@Test
 	public void save() {
-		UsuarioDTO usuarioDTO = new UsuarioDTO("minha.senha", "meu.login");
+		UsuarioDTO usuarioDTO = new UsuarioDTO("minha_senha", "meu.login");
 
 		Usuario usuarioMock = Mockito.mock(Usuario.class);
 

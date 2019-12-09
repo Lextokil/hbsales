@@ -5,6 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,6 +58,14 @@ public class UsuarioService {
 		if (StringUtils.isEmpty(usuarioDTO.getLogin())) {
 			throw new IllegalArgumentException("Login não deve ser nulo/vazio");
 		}
+	}
+
+
+	public List<Usuario> findAll() {
+
+		List<Usuario> usuarios = (List<Usuario>) iUsuarioRepository.findAll();
+
+		return usuarios;
 	}
 
 	public UsuarioDTO findById(Long id) {
