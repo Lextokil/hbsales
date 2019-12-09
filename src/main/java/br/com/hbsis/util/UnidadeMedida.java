@@ -1,15 +1,14 @@
 package br.com.hbsis.util;
 
-public enum Extension {
+public enum UnidadeMedida {
 
-
-    CSV("csv"),
-    XML("xml"),
-    JSON("json");
+    MG("miligramas"),
+    G("gramas"),
+    KG("quilogramas");
 
     private final String descricao;
 
-    Extension(String descricao) {
+    UnidadeMedida(String descricao) {
         this.descricao = descricao;
     }
 

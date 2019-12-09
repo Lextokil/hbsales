@@ -1,11 +1,18 @@
 package br.com.hbsis.produtos;
 
+import br.com.hbsis.categoriaprodutos.CategoriaProduto;
+import br.com.hbsis.fornecedor.Fornecedor;
 import br.com.hbsis.linhacategoria.LinhaCategoria;
 import br.com.hbsis.linhacategoria.LinhaCategoriaService;
+import br.com.hbsis.util.CodCategoriaGenerator;
+import br.com.hbsis.util.DateValidator;
 import br.com.hbsis.util.Extension;
+import br.com.hbsis.util.UnidadeMedida;
+import br.com.hbsis.validation.CnpjValidator;
 import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +23,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +51,8 @@ public class ProdutoService {
         LOGGER.info("Salvando Produto");
         LOGGER.debug("Produto: {}", produtoDTO);
 
+        produtoDTO.setCodProduto(CodCategoriaGenerator.generateCode(produtoDTO.getCodProduto()));
+
 
         Produto produto = new Produto(
                 produtoDTO.getCodProduto(),
@@ -47,6 +60,7 @@ public class ProdutoService {
                 produtoDTO.getPrecoProduto(),
                 produtoDTO.getUnidadeProduto(),
                 produtoDTO.getPesoUnidade(),
+                produtoDTO.getUnidadeMedida(),
                 produtoDTO.getValidadeProduto(),
                 linhaCategoria
         );
@@ -67,6 +81,9 @@ public class ProdutoService {
         if (StringUtils.isEmpty(produtoDTO.getCodProduto())) {
             throw new IllegalArgumentException("Codigo do produto não deve ser nulo");
         }
+        if (produtoDTO.getCodProduto().length() > 10) {
+            throw new IllegalArgumentException("Codigo não deve ter mais de 10 caracteres");
+        }
 
         if (StringUtils.isEmpty(produtoDTO.getNomeProduto())) {
             throw new IllegalArgumentException("Nome do produto não deve ser nulo/vazio");
@@ -78,9 +95,13 @@ public class ProdutoService {
         if (StringUtils.isEmpty(produtoDTO.getPesoUnidade().toString())) {
             throw new IllegalArgumentException("Produto deve ter um peso por unidade");
         }
-        if (StringUtils.isEmpty(produtoDTO.getValidadeProduto())) {
+        if(!EnumUtils.isValidEnum(UnidadeMedida.class, produtoDTO.getUnidadeMedida())){
+            throw new IllegalArgumentException("Unidade de medida inválida");
+        }
+        if (produtoDTO.getValidadeProduto().equals(null)) {
             throw new IllegalArgumentException("Produto tem que ter uma validade");
         }
+
         if (StringUtils.isEmpty(String.valueOf(produtoDTO.getUnidadeProduto()))) {
             throw new IllegalArgumentException("Produto tem que ter uma validade");
         }
@@ -124,6 +145,8 @@ public class ProdutoService {
         if (produtoOptional.isPresent()) {
             Produto produtoExistente = produtoOptional.get();
             LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(produtoDTO.getLinhaCategoria());
+            validate(produtoDTO);
+            produtoDTO.setCodProduto(CodCategoriaGenerator.generateCode(produtoDTO.getCodProduto()));
 
 
             LOGGER.info("Atualizando produto... id: [{}]", produtoExistente.getId());
@@ -135,6 +158,7 @@ public class ProdutoService {
             produtoExistente.setPesoUnidade(produtoDTO.getPesoUnidade());
             produtoExistente.setPrecoProduto(produtoDTO.getPrecoProduto());
             produtoExistente.setUnidadeProduto(produtoDTO.getUnidadeProduto());
+            produtoExistente.setUnidadeMedida(produtoDTO.getUnidadeMedida());
             produtoExistente.setValidadeProduto(produtoDTO.getValidadeProduto());
             produtoExistente.setLinhaCategoria(linhaCategoria);
 
@@ -151,7 +175,7 @@ public class ProdutoService {
         this.iProdutoRepository.deleteById(id);
     }
 
-    public void exportFromData(HttpServletResponse response) throws IOException {
+    public void exportFromData(HttpServletResponse response) throws IOException, ParseException {
         String filename = "produtos.csv";
         Boolean succes = false;
 
@@ -165,13 +189,19 @@ public class ProdutoService {
                 withEscapeChar(CSVWriter.DEFAULT_ESCAPE_CHARACTER).
                 withLineEnd(CSVWriter.DEFAULT_LINE_END).
                 build();
-        String headerCSV[] = {"ID", "COD_PRODUTO", "NOME_PRODUTO", "PRECO_PRODUTO", "UNIDADE_PRODUTO", "PESO_UNIDADE", "VALIDADE", "ID_LINHA"};
+        String headerCSV[] = {"ID", "COD_PRODUTO", "NOME_PRODUTO", "PRECO_PRODUTO", "UNIDADE_CAIXA", "PESO_UNIDADE",
+            "VALIDADE", "COD_LINHA", "NOME_LINHA","COD_CATEGORIA", "NOME_CATEGORIA", "CNPJ_FORNECEDOR","RAZAO_SOCIAL"        };
         icsvWriter.writeNext(headerCSV);
 
         for (Produto row : this.findAll()) {
+            LinhaCategoria lc = row.getLinhaCategoria();
+            CategoriaProduto cp = lc.getCategoriaProduto();
+            Fornecedor f = cp.getFornecedor();
             icsvWriter.writeNext(new String[]{String.valueOf(row.getId()), row.getCodProduto(), row.getNomeProduto(),
-                    String.valueOf(row.getPrecoProduto()), String.valueOf(row.getUnidadeProduto()),
-                    String.valueOf(row.getPesoUnidade()), row.getValidadeProduto(), String.valueOf(row.getLinhaCategoria().getIdLinhaCategoria())});
+                    ("R$:"+formatDecimal(row.getPrecoProduto())), String.valueOf(row.getUnidadeProduto()),
+                    (formatDecimal(row.getPesoUnidade()) + row.getUnidadeMedida()), DateValidator.convertDateToString(row.getValidadeProduto()),
+                    String.valueOf(lc.getCodLinha()), lc.getNomeLinha(), cp.getCodCategoria(),
+                    cp.getNome(), CnpjValidator.formatCnpj(f.getCnpj()), f.getRazaoSocial()});
             LOGGER.info("Exportando Linha Categoria ID: {}", row.getId());
         }
 
@@ -211,10 +241,10 @@ public class ProdutoService {
 
             LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(Long.parseLong(linhaTemp[7]));
 
-            Produto produto = new Produto(linhaTemp[1], linhaTemp[2], Double.parseDouble(linhaTemp[3]), Integer.parseInt(linhaTemp[4]),
+            /*Produto produto = new Produto(linhaTemp[1], linhaTemp[2], Double.parseDouble(linhaTemp[3]), Integer.parseInt(linhaTemp[4]),
                     Double.parseDouble(linhaTemp[5]), linhaTemp[6], linhaCategoria);
 
-            this.iProdutoRepository.save(produto);
+            this.iProdutoRepository.save(produto);*/
         }
 
     }
@@ -222,7 +252,7 @@ public class ProdutoService {
     private void readDataFromCsvWithFornecedorID(MultipartFile file, Long idFornecedor) throws IOException {
 
 
-            InputStreamReader reader = new InputStreamReader(file.getInputStream());
+           /* InputStreamReader reader = new InputStreamReader(file.getInputStream());
             CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
 
             List<String[]> linhas = csvReader.readAll();
@@ -269,6 +299,14 @@ public class ProdutoService {
         boolean isSameFornecedor = false;
         LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(idLinha);
         isSameFornecedor = linhaCategoria.getCategoriaProduto().getFornecedor().getId() == idFornecedorToCheck;
-        return isSameFornecedor;
+        return isSameFornecedor;*/
+
+
+    }
+    public String formatDecimal(Double valor) {
+        DecimalFormat df = new DecimalFormat("0.00");
+        df.setMaximumFractionDigits(2);
+        String valorFormatado = df.format(valor);
+        return valorFormatado;
     }
 }

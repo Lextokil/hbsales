@@ -30,4 +30,9 @@ public class CodCategoriaGenerator {
         }
     }
 
+    public static String generateCode(String code){
+        String codeGenerated = StringUtils.leftPad(code, 10, "0");
+        return  codeGenerated.toUpperCase();
+    }
+
 }

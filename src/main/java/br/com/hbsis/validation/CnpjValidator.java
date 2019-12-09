@@ -4,8 +4,10 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.text.MaskFormatter;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,6 +65,15 @@ public class CnpjValidator implements ConstraintValidator<CnpjValidation, String
 		cnpj = cnpj.trim().replace(".", "").replace("-", "").replace("/","");
 
 		return cnpj;
+	}
+	public static String formatCnpj(String cnpj) throws ParseException {
+		try {
+			MaskFormatter mask = new MaskFormatter("###.###.###/####-##");
+			mask.setValueContainsLiteralCharacters(false);
+			return mask.valueToString(cnpj);
+		} catch (ParseException ex) {
+			throw new ParseException("erro so formatar cnpj", 2);
+		}
 	}
 
 }
