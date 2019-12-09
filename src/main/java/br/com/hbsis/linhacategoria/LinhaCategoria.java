@@ -13,14 +13,14 @@ public class LinhaCategoria {
     @Column(name = "id")
     private Long idLinhaCategoria;
 
-    @Column(name = "cod_linha")
+    @Column(name = "cod_linha", nullable = false, length = 10)
     private String codLinha;
 
     @ManyToOne
-    @JoinColumn(name = "id_categoria", referencedColumnName = "id")
+    @JoinColumn(name = "id_categoria", referencedColumnName = "id", nullable = false)
     private CategoriaProduto categoriaProduto;
 
-    @Column(name = "nome_linha")
+    @Column(name = "nome_linha", nullable = false, length = 50)
     private String nomeLinha;
 
     public LinhaCategoria() {
