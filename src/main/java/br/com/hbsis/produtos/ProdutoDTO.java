@@ -2,7 +2,6 @@ package br.com.hbsis.produtos;
 
 import br.com.hbsis.util.DateValidator;
 
-import java.time.LocalDateTime;
 
 public class ProdutoDTO {
     private  Long idProduto;
@@ -12,14 +11,14 @@ public class ProdutoDTO {
     private int unidadeProduto;
     private Double pesoUnidade;
     private String unidadeMedida;
-    private LocalDateTime validadeProduto;
+    private String validadeProduto;
     private Long linhaCategoria;
 
     public ProdutoDTO() {
     }
 
     public ProdutoDTO(Long idProduto, String codProduto, String nomeProduto, Double precoProduto, int unidadeProduto,
-                      Double pesoUnidade, String unidadeMedida, LocalDateTime validadeProduto, Long linhaCategoria) {
+                      Double pesoUnidade, String unidadeMedida, String validadeProduto, Long linhaCategoria) {
         this.idProduto = idProduto;
         this.codProduto = codProduto;
         this.nomeProduto = nomeProduto;
@@ -40,7 +39,7 @@ public class ProdutoDTO {
                 produto.getUnidadeProduto(),
                 produto.getPesoUnidade(),
                 produto.getUnidadeMedida(),
-                produto.getValidadeProduto(),
+                DateValidator.convertDateToString(produto.getValidadeProduto()),
                 produto.getLinhaCategoria().getIdLinhaCategoria());
     }
 
@@ -50,14 +49,6 @@ public class ProdutoDTO {
 
     public void setIdProduto(Long idProduto) {
         this.idProduto = idProduto;
-    }
-
-    public String getUnidadeMedida() {
-        return unidadeMedida;
-    }
-
-    public void setUnidadeMedida(String unidadeMedida) {
-        this.unidadeMedida = unidadeMedida;
     }
 
     public String getCodProduto() {
@@ -100,11 +91,19 @@ public class ProdutoDTO {
         this.pesoUnidade = pesoUnidade;
     }
 
-    public LocalDateTime getValidadeProduto() {
+    public String getUnidadeMedida() {
+        return unidadeMedida;
+    }
+
+    public void setUnidadeMedida(String unidadeMedida) {
+        this.unidadeMedida = unidadeMedida;
+    }
+
+    public String getValidadeProduto() {
         return validadeProduto;
     }
 
-    public void setValidadeProduto(LocalDateTime validadeProduto) {
+    public void setValidadeProduto(String validadeProduto) {
         this.validadeProduto = validadeProduto;
     }
 

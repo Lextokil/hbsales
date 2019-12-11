@@ -62,7 +62,7 @@ public class ProdutoService {
         LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(produtoDTO.getLinhaCategoria());
 
         this.validate(produtoDTO);
-        LOGGER.info("Salvando Produto");
+         LOGGER.info("Salvando Produto");
         LOGGER.debug("Produto: {}", produtoDTO);
 
         produtoDTO.setCodProduto(CodeManager.generateProdutoCode(produtoDTO.getCodProduto()));
@@ -75,7 +75,7 @@ public class ProdutoService {
                 produtoDTO.getUnidadeProduto(),
                 produtoDTO.getPesoUnidade(),
                 produtoDTO.getUnidadeMedida(),
-                produtoDTO.getValidadeProduto(),
+                DateValidator.convertToLocalDateTime(produtoDTO.getValidadeProduto()),
                 linhaCategoria
         );
 
@@ -174,7 +174,7 @@ public class ProdutoService {
             produtoExistente.setPrecoProduto(produtoDTO.getPrecoProduto());
             produtoExistente.setUnidadeProduto(produtoDTO.getUnidadeProduto());
             produtoExistente.setUnidadeMedida(produtoDTO.getUnidadeMedida());
-            produtoExistente.setValidadeProduto(produtoDTO.getValidadeProduto());
+            produtoExistente.setValidadeProduto(DateValidator.convertToLocalDateTime(produtoDTO.getValidadeProduto()));
             produtoExistente.setLinhaCategoria(linhaCategoria);
 
             produtoExistente = this.iProdutoRepository.save(produtoExistente);
@@ -308,8 +308,7 @@ public class ProdutoService {
                 produtoDTO.setPesoUnidade(peso);
                 String unidadeMedida = linha[5].replaceAll("[0-9.,]", "");
                 produtoDTO.setUnidadeMedida(unidadeMedida);
-                LocalDateTime validade = DateValidator.convertToLocalDateTime(linha[6]);
-                produtoDTO.setValidadeProduto(validade);
+                produtoDTO.setValidadeProduto(linha[6]);
                 produtoDTO.setLinhaCategoria(linhaCategoria.getIdLinhaCategoria());
 
                 if (categoriaProdutoDTO.getFornecedor() == fornecedorDoProduto.getId()) {
