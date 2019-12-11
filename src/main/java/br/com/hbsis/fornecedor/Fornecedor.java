@@ -26,7 +26,7 @@ public class Fornecedor {
 	@Column(name = "email", length = 11)
 	private String emailContato;
 
-	@Column(name = "telefone", length = 50)
+	@Column(name = "telefone", length = 14)
 	private String telefoneContato;
 
 	public Fornecedor() {

@@ -5,12 +5,15 @@ import org.springframework.context.annotation.Configuration;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Configuration
 public class DateValidator {
 
-    public boolean isThisDateValid(String dateToValidate, String dateFromat){
+    public static boolean isThisDateValid(String dateToValidate, String dateFromat){
 
         if(dateToValidate == null){
             return false;
@@ -32,6 +35,27 @@ public class DateValidator {
         }
 
         return true;
+    }
+
+    public static LocalDateTime convertToLocalDateTime(String dateToConvert){
+        if(isThisDateValid(dateToConvert, "dd/MM/yyyy")){
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/uuuu");
+
+            LocalDateTime localDate = LocalDate.parse(dateToConvert, formatter).atStartOfDay();
+
+            return localDate;
+        }else{
+            return null;
+        }
+
+    }
+
+    public  static String convertDateToString(LocalDateTime dateToConvert){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        String formatDateTime = dateToConvert.format(formatter);
+
+        return formatDateTime;
     }
 
 }
