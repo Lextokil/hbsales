@@ -1,34 +1,38 @@
 package br.com.hbsis.periodovendas;
 
-import java.util.Date;
+import br.com.hbsis.util.DateValidator;
+
+import java.time.LocalDateTime;
 
 public class PeriodoVendasDTO {
 
     private Long id;
-    private Date dataInicio;
-    private Date dataFinal;
-    private Date dataRetirada;
+    private String dataInicio;
+    private String dataFinal;
+    private String dataRetirada;
+    private String descricao;
     private Long idFornecedor;
 
     public PeriodoVendasDTO() {
     }
 
 
-
-    public PeriodoVendasDTO(Long id, Date dataInicio, Date dataFinal, Date dataRetirada, Long idFornecedor) {
+    public PeriodoVendasDTO(Long id, String dataInicio, String dataFinal, String dataRetirada, String descricao, Long idFornecedor) {
         this.id = id;
         this.dataInicio = dataInicio;
         this.dataFinal = dataFinal;
         this.dataRetirada = dataRetirada;
+        this.descricao = descricao;
         this.idFornecedor = idFornecedor;
     }
 
     public static PeriodoVendasDTO of (PeriodoVendas periodoVendas){
         PeriodoVendasDTO periodoVendasDTO = new PeriodoVendasDTO(
                 periodoVendas.getId(),
-                periodoVendas.getDataInicio(),
-                periodoVendas.getDataFinal(),
-                periodoVendas.getDataRetirada(),
+                DateValidator.convertDateToString(periodoVendas.getDataInicio()),
+                DateValidator.convertDateToString(periodoVendas.getDataFinal()),
+                DateValidator.convertDateToString(periodoVendas.getDataRetirada()),
+                periodoVendas.getDescricao(),
                 periodoVendas.getFornecedor().getId()
         );
         return periodoVendasDTO;
@@ -42,28 +46,36 @@ public class PeriodoVendasDTO {
         this.id = id;
     }
 
-    public Date getDataInicio() {
+    public String getDataInicio() {
         return dataInicio;
     }
 
-    public void setDataInicio(Date dataInicio) {
+    public void setDataInicio(String dataInicio) {
         this.dataInicio = dataInicio;
     }
 
-    public Date getDataFinal() {
+    public String getDataFinal() {
         return dataFinal;
     }
 
-    public void setDataFinal(Date dataFinal) {
+    public void setDataFinal(String dataFinal) {
         this.dataFinal = dataFinal;
     }
 
-    public Date getDataRetirada() {
+    public String getDataRetirada() {
         return dataRetirada;
     }
 
-    public void setDataRetirada(Date dataRetirada) {
+    public void setDataRetirada(String dataRetirada) {
         this.dataRetirada = dataRetirada;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
     }
 
     public Long getIdFornecedor() {
@@ -73,4 +85,5 @@ public class PeriodoVendasDTO {
     public void setIdFornecedor(Long idFornecedor) {
         this.idFornecedor = idFornecedor;
     }
+
 }
