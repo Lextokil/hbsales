@@ -27,7 +27,7 @@ public class PeriodoVendasRest {
     @PostMapping
     public PeriodoVendasDTO save(@RequestBody PeriodoVendasDTO periodoVendasDTO){
 
-        LOGGER.info("Recebendo solicitação de persistência de categoria...");
+        LOGGER.info("Recebendo solicitação de persistência do periodo de vendas...");
         LOGGER.debug("Payaload: {}", periodoVendasDTO);
 
         return  this.periodoVendasService.save(periodoVendasDTO);
@@ -48,7 +48,7 @@ public class PeriodoVendasRest {
 
     @PutMapping("/{id}")
     public PeriodoVendasDTO update(@PathVariable("id") Long id, @RequestBody PeriodoVendasDTO periodoVendasDTO){
-        LOGGER.info("Recebendo Update para produto de ID: {}", id);
+        LOGGER.info("Recebendo Update para periodo de vendas de ID: {}", id);
         LOGGER.debug("Payload: {}", periodoVendasDTO);
 
         return  this.periodoVendasService.update(periodoVendasDTO, id);
@@ -56,6 +56,7 @@ public class PeriodoVendasRest {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id") Long id){
+        LOGGER.info("Deletando periodo de vendas de ID: {}", id);
         this.periodoVendasService.delete(id);
     }
 

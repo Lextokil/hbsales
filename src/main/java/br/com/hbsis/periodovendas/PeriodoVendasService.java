@@ -3,6 +3,8 @@ package br.com.hbsis.periodovendas;
 import br.com.hbsis.fornecedor.Fornecedor;
 import br.com.hbsis.fornecedor.FornecedorService;
 import br.com.hbsis.util.DateValidator;
+import com.sun.org.apache.xerces.internal.impl.dv.DatatypeValidator;
+import org.apache.poi.ss.usermodel.DataValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,12 +20,10 @@ public class PeriodoVendasService {
 
     private final IPeriodoVendasRepository iPeriodoVendasRepository;
     private final FornecedorService fornecedorService;
-    private final DateValidator dateValidator;
 
     public PeriodoVendasService(IPeriodoVendasRepository iPeriodoVendasRepository, FornecedorService fornecedorService, DateValidator dateValidator) {
         this.iPeriodoVendasRepository = iPeriodoVendasRepository;
         this.fornecedorService = fornecedorService;
-        this.dateValidator = dateValidator;
     }
 
     public PeriodoVendasDTO save(PeriodoVendasDTO periodoVendasDTO) {
@@ -38,9 +38,10 @@ public class PeriodoVendasService {
 
 
         PeriodoVendas periodoVendas = new PeriodoVendas(
-                periodoVendasDTO.getDataInicio(),
-                periodoVendasDTO.getDataFinal(),
-                periodoVendasDTO.getDataRetirada(),
+                DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataInicio()),
+                DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataFinal()),
+                DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataRetirada()),
+                periodoVendasDTO.getDescricao(),
                 fornecedor
         );
 
@@ -58,13 +59,13 @@ public class PeriodoVendasService {
             throw new IllegalArgumentException("Periodo de venda não deve ser nulo");
         }
 
-        if (dateValidator.isThisDateValid(periodoVendasDTO.getDataInicio().toString(), "dd/MM/yyyy")) {
+        if (DateValidator.isThisDateValid(periodoVendasDTO.getDataInicio().toString(), "dd-MM-yyyy")) {
             throw new IllegalArgumentException("Periodo tem que ter uma Data de inicio válida");
         }
-        if (dateValidator.isThisDateValid(periodoVendasDTO.getDataFinal().toString(), "dd/MM/yyyy")) {
+        if (DateValidator.isThisDateValid(periodoVendasDTO.getDataFinal().toString(), "dd-MM-yyyy")) {
             throw new IllegalArgumentException("Periodo tem que ter uma Data final válida");
         }
-        if (dateValidator.isThisDateValid(periodoVendasDTO.getDataRetirada().toString(), "dd/MM/yyyy")) {
+        if (DateValidator.isThisDateValid(periodoVendasDTO.getDataRetirada().toString(), "dd-MM-yyyy")) {
             throw new IllegalArgumentException("Periodo tem que ter uma Data de retirada válida");
         }
 
@@ -101,9 +102,9 @@ public class PeriodoVendasService {
             LOGGER.debug("Payload: {}", periodoVendasDTO);
             LOGGER.debug("Produto Existente: {}", periodoVendasExistente);
 
-            periodoVendasExistente.setDataInicio(periodoVendasDTO.getDataInicio());
-            periodoVendasExistente.setDataFinal(periodoVendasDTO.getDataFinal());
-            periodoVendasExistente.setDataRetirada(periodoVendasDTO.getDataRetirada());
+            periodoVendasExistente.setDataInicio(DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataInicio()));
+            periodoVendasExistente.setDataFinal(DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataFinal()));
+            periodoVendasExistente.setDataRetirada(DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataRetirada()));
             periodoVendasExistente.setFornecedor(fornecedor);
 
             periodoVendasExistente = this.iPeriodoVendasRepository.save(periodoVendasExistente);
