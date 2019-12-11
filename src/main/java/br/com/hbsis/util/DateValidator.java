@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -37,14 +38,11 @@ public class DateValidator {
     }
 
     public static LocalDateTime convertToLocalDateTime(String dateToConvert){
-        if(isThisDateValid(dateToConvert, "dd-MM-yyyy")){
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/yyyy");
+        if(isThisDateValid(dateToConvert, "dd/MM/yyyy")){
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/uuuu");
 
-            LocalDateTime localDate = LocalDateTime.parse(dateToConvert, formatter);
+            LocalDateTime localDate = LocalDate.parse(dateToConvert, formatter).atStartOfDay();
 
-            System.out.println(localDate);
-
-            System.out.println(formatter.format(localDate));
             return localDate;
         }else{
             return null;

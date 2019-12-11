@@ -43,8 +43,8 @@ public class LinhaCategoriaService {
         CategoriaProduto categoriaProduto = categoriaProdutoService.findCategoriaProdutoById(linhaCategoriaDTO.getCategoriaProduto());
 
         this.validate(linhaCategoriaDTO);
-        LOGGER.info("Salvando Produto");
-        LOGGER.debug("Produto: {}", linhaCategoriaDTO);
+        LOGGER.info("Salvando Linha");
+        LOGGER.debug("Linha: {}", linhaCategoriaDTO);
 
 
         LinhaCategoria linhaCategoria = new LinhaCategoria(
@@ -52,7 +52,7 @@ public class LinhaCategoriaService {
                 linhaCategoriaDTO.getNomeLinha(),
                 categoriaProduto
         );
-        linhaCategoria.setCodLinha(CodeManager.codLinhaGenerator(linhaCategoriaDTO));
+        linhaCategoria.setCodLinha(CodeManager.codLinhaGenerator(linhaCategoriaDTO.getCodLinha()));
 
         linhaCategoria = this.iLinhaCategoriaRepository.save(linhaCategoria);
 
@@ -60,7 +60,7 @@ public class LinhaCategoriaService {
     }
 
     private void validate(LinhaCategoriaDTO linhaCategoriaDTO) {
-        LOGGER.info("Validando Linha de categoria");
+        LOGGER.info("Validando Linha ");
 
         if (linhaCategoriaDTO == null) {
             throw new IllegalArgumentException("Linha de categoria não deve ser nula");
@@ -122,15 +122,15 @@ public class LinhaCategoriaService {
 
             CategoriaProduto categoriaProduto = categoriaProdutoService.findCategoriaProdutoById(linhaCategoriaDTO.getCategoriaProduto());
 
-            LOGGER.info("Atualizando produto... id: [{}]", linhaCategoriaExistente.getIdLinhaCategoria());
+            LOGGER.info("Atualizando Linha... id: [{}]", linhaCategoriaExistente.getIdLinhaCategoria());
             LOGGER.debug("Payload: {}", linhaCategoriaDTO);
-            LOGGER.debug("Produto Existente: {}", linhaCategoriaExistente);
+            LOGGER.debug("Linha Existente: {}", linhaCategoriaExistente);
 
 
             linhaCategoriaExistente.setCodLinha(linhaCategoriaDTO.getCodLinha());
             linhaCategoriaExistente.setCategoriaProduto(categoriaProduto);
             linhaCategoriaExistente.setNomeLinha(linhaCategoriaDTO.getNomeLinha());
-            linhaCategoriaExistente.setCodLinha(CodeManager.codLinhaGenerator(linhaCategoriaDTO));
+            linhaCategoriaExistente.setCodLinha(CodeManager.codLinhaGenerator(linhaCategoriaDTO.getCodLinha()));
 
             linhaCategoriaExistente = this.iLinhaCategoriaRepository.save(linhaCategoriaExistente);
 
@@ -183,19 +183,26 @@ public class LinhaCategoriaService {
     private void readDataFromCsv(MultipartFile file) throws IOException {
 
         InputStreamReader reader = new InputStreamReader(file.getInputStream());
-        CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
+        CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
+        CSVReader csvReader = new CSVReaderBuilder(reader)
+                .withSkipLines(1).withCSVParser(parser)
+                .build();
 
         List<String[]> linhas = csvReader.readAll();
 
         for (String[] linha : linhas) {
-            String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
 
             try{
-                CategoriaProduto categoriaProduto = iCategoriaProdutoRepository.findByCode(linhaTemp[3]).get();
-                if(!iLinhaCategoriaRepository.findByCode(linhaTemp[1]).isPresent()){
-                    LinhaCategoria linhaCategoria = new LinhaCategoria(linhaTemp[1], linhaTemp[2], categoriaProduto);
+                CategoriaProduto categoriaProduto = iCategoriaProdutoRepository.findByCode(linha[3]).get();
+                if(!iLinhaCategoriaRepository.findByCode(linha[1]).isPresent()){
+                    LinhaCategoria linhaCategoria = new LinhaCategoria(linha[1], linha[2], categoriaProduto);
+                    try {
+                        save(LinhaCategoriaDTO.of(linhaCategoria));
+                    }catch (Exception e){
+                        LOGGER.info("Erro ao salvar linha");
+                        LOGGER.error(e.toString());
+                    }
 
-                    save(LinhaCategoriaDTO.of(linhaCategoria));
                 }
             }catch (Exception e){
                 throw new IllegalArgumentException("Código do fornecedor inválido");

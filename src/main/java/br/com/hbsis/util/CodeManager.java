@@ -33,13 +33,13 @@ public class CodeManager {
     }
 
 
-    public static String generateCode(String code) {
+    public static String generateProdutoCode(String code) {
         String codeGenerated = StringUtils.leftPad(code, 10, "0");
         return codeGenerated.toUpperCase();
 
     }
-    public static String codLinhaGenerator(LinhaCategoriaDTO linhaCategoriaDTO){
-        String code = linhaCategoriaDTO.getCodLinha();
+    public static String codLinhaGenerator(String codLinha){
+        String code = codLinha;
         code = code.replaceAll("[^a-zA-Z0-9]+","");
         code = StringUtils.leftPad(code, 10, "0");
 

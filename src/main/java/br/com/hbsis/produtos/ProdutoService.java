@@ -1,14 +1,21 @@
 package br.com.hbsis.produtos;
 
 import br.com.hbsis.categoriaprodutos.CategoriaProduto;
+import br.com.hbsis.categoriaprodutos.CategoriaProdutoDTO;
+import br.com.hbsis.categoriaprodutos.CategoriaProdutoService;
+import br.com.hbsis.categoriaprodutos.ICategoriaProdutoRepository;
 import br.com.hbsis.fornecedor.Fornecedor;
+import br.com.hbsis.fornecedor.IFornecedorRepository;
+import br.com.hbsis.linhacategoria.ILinhaCategoriaRepository;
 import br.com.hbsis.linhacategoria.LinhaCategoria;
+import br.com.hbsis.linhacategoria.LinhaCategoriaDTO;
 import br.com.hbsis.linhacategoria.LinhaCategoriaService;
 import br.com.hbsis.util.CodeManager;
 import br.com.hbsis.util.DateValidator;
 import br.com.hbsis.util.Extension;
 import br.com.hbsis.util.UnidadeMedida;
 import br.com.hbsis.validation.CnpjValidator;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.opencsv.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -25,8 +32,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.EnumSet;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,10 +42,18 @@ public class ProdutoService {
 
     private final IProdutoRepository iProdutoRepository;
     private final LinhaCategoriaService linhaCategoriaService;
+    private final ILinhaCategoriaRepository iLinhaCategoriaRepository;
+    private final ICategoriaProdutoRepository iCategoriaProdutoRepository;
+    private final IFornecedorRepository iFornecedorRepository;
+    private final CategoriaProdutoService categoriaProdutoService;
 
-    public ProdutoService(IProdutoRepository iProdutoRepository, LinhaCategoriaService linhaCategoriaService) {
+    public ProdutoService(IProdutoRepository iProdutoRepository, LinhaCategoriaService linhaCategoriaService, ILinhaCategoriaRepository iLinhaCategoriaRepository, ICategoriaProdutoRepository iCategoriaProdutoRepository, IFornecedorRepository iFornecedorRepository, CategoriaProdutoService categoriaProdutoService) {
         this.iProdutoRepository = iProdutoRepository;
         this.linhaCategoriaService = linhaCategoriaService;
+        this.iLinhaCategoriaRepository = iLinhaCategoriaRepository;
+        this.iCategoriaProdutoRepository = iCategoriaProdutoRepository;
+        this.iFornecedorRepository = iFornecedorRepository;
+        this.categoriaProdutoService = categoriaProdutoService;
     }
 
     public ProdutoDTO save(ProdutoDTO produtoDTO) {
@@ -51,7 +65,7 @@ public class ProdutoService {
         LOGGER.info("Salvando Produto");
         LOGGER.debug("Produto: {}", produtoDTO);
 
-        produtoDTO.setCodProduto(CodeManager.generateCode(produtoDTO.getCodProduto()));
+        produtoDTO.setCodProduto(CodeManager.generateProdutoCode(produtoDTO.getCodProduto()));
 
 
         Produto produto = new Produto(
@@ -72,7 +86,7 @@ public class ProdutoService {
     }
 
     private void validate(ProdutoDTO produtoDTO) {
-        LOGGER.info("Validando Linha de categoria");
+        LOGGER.info("Validando Produto");
 
         if (produtoDTO == null) {
             throw new IllegalArgumentException("Produto não deve ser nulo");
@@ -95,7 +109,7 @@ public class ProdutoService {
         if (StringUtils.isEmpty(produtoDTO.getPesoUnidade().toString())) {
             throw new IllegalArgumentException("Produto deve ter um peso por unidade");
         }
-        if(!EnumUtils.isValidEnum(UnidadeMedida.class, produtoDTO.getUnidadeMedida())){
+        if (!EnumUtils.isValidEnum(UnidadeMedida.class, produtoDTO.getUnidadeMedida())) {
             throw new IllegalArgumentException("Unidade de medida inválida");
         }
         if (produtoDTO.getValidadeProduto().equals(null)) {
@@ -120,6 +134,7 @@ public class ProdutoService {
 
         throw new IllegalArgumentException(String.format("ID %s não existe", id));
     }
+
     public Produto findProdutoById(Long id) {
 
         Optional<Produto> produto = this.iProdutoRepository.findById(id);
@@ -146,7 +161,7 @@ public class ProdutoService {
             Produto produtoExistente = produtoOptional.get();
             LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(produtoDTO.getLinhaCategoria());
             validate(produtoDTO);
-            produtoDTO.setCodProduto(CodeManager.generateCode(produtoDTO.getCodProduto()));
+            produtoDTO.setCodProduto(CodeManager.generateProdutoCode(produtoDTO.getCodProduto()));
 
 
             LOGGER.info("Atualizando produto... id: [{}]", produtoExistente.getId());
@@ -190,19 +205,24 @@ public class ProdutoService {
                 withLineEnd(CSVWriter.DEFAULT_LINE_END).
                 build();
         String headerCSV[] = {"ID", "COD_PRODUTO", "NOME_PRODUTO", "PRECO_PRODUTO", "UNIDADE_CAIXA", "PESO_UNIDADE",
-            "VALIDADE", "COD_LINHA", "NOME_LINHA","COD_CATEGORIA", "NOME_CATEGORIA", "CNPJ_FORNECEDOR","RAZAO_SOCIAL"        };
+                "VALIDADE", "COD_LINHA", "NOME_LINHA", "COD_CATEGORIA", "NOME_CATEGORIA", "CNPJ_FORNECEDOR", "RAZAO_SOCIAL"};
         icsvWriter.writeNext(headerCSV);
 
-        for (Produto row : this.findAll()) {
-            LinhaCategoria lc = row.getLinhaCategoria();
+        for (Produto produtoRow : this.findAll()) {
+
+            LinhaCategoria lc = produtoRow.getLinhaCategoria();
             CategoriaProduto cp = lc.getCategoriaProduto();
             Fornecedor f = cp.getFornecedor();
-            icsvWriter.writeNext(new String[]{String.valueOf(row.getId()), row.getCodProduto(), row.getNomeProduto(),
-                    ("R$:"+formatDecimal(row.getPrecoProduto())), String.valueOf(row.getUnidadeProduto()),
-                    (formatDecimal(row.getPesoUnidade()) + row.getUnidadeMedida()), DateValidator.convertDateToString(row.getValidadeProduto()),
+
+            icsvWriter.writeNext(new String[]{
+                    String.valueOf(produtoRow.getId()), produtoRow.getCodProduto(), produtoRow.getNomeProduto(),
+                    ("R$:" + formatDecimal(produtoRow.getPrecoProduto())), String.valueOf(produtoRow.getUnidadeProduto()),
+                    (formatDecimal(produtoRow.getPesoUnidade()) + produtoRow.getUnidadeMedida()),
+                    DateValidator.convertDateToString(produtoRow.getValidadeProduto()),
                     String.valueOf(lc.getCodLinha()), lc.getNomeLinha(), cp.getCodCategoria(),
                     cp.getNome(), CnpjValidator.formatCnpj(f.getCnpj()), f.getRazaoSocial()});
-            LOGGER.info("Exportando Linha Categoria ID: {}", row.getId());
+
+            LOGGER.info("Exportando Produto de ID: {}", produtoRow.getId());
         }
 
     }
@@ -232,81 +252,178 @@ public class ProdutoService {
     private void readDataFromCsv(MultipartFile file) throws IOException {
 
         InputStreamReader reader = new InputStreamReader(file.getInputStream());
-        CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
+        CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
+        CSVReader csvReader = new CSVReaderBuilder(reader)
+                .withCSVParser(parser)
+                .withSkipLines(1)
+                .build();
 
         List<String[]> linhas = csvReader.readAll();
 
-        /*for (String[] linha : linhas) {
-            String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
+        for (String[] linha : linhas) {
 
-            LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(Long.parseLong(linhaTemp[7]));
+            LinhaCategoria linhaCategoria = iLinhaCategoriaRepository.findByCode(linha[7]).get();
+            Double preco = Double.parseDouble(linha[3].replaceAll("[^0-9.,]", ""));
+            Double peso = Double.parseDouble(linha[5].replaceAll("[^0-9.,]", ""));
+            String unidadeMedida = linha[5].replaceAll("[0-9.,]", "");
+            LocalDateTime validade = DateValidator.convertToLocalDateTime(linha[6]);
 
-            Produto produto = new Produto(linhaTemp[1], linhaTemp[2], Double.parseDouble(linhaTemp[3]), Integer.parseInt(linhaTemp[4]),
-                    Double.parseDouble(linhaTemp[5]), linhaTemp[6], linhaCategoria);
+            Produto produto = new Produto(linha[1], linha[2], preco, Integer.parseInt(linha[4]),
+                    peso, unidadeMedida, validade, linhaCategoria);
+            produto.setCodProduto(CodeManager.generateProdutoCode(produto.getCodProduto()));
+            validate(ProdutoDTO.of(produto));
 
             this.iProdutoRepository.save(produto);
-        }*/
+        }
 
     }
 
     private void readDataFromCsvWithFornecedorID(MultipartFile file, Long idFornecedor) throws IOException {
 
 
-           /* InputStreamReader reader = new InputStreamReader(file.getInputStream());
-            CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
+        InputStreamReader reader = new InputStreamReader(file.getInputStream());
+        CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
+        CSVReader csvReader = new CSVReaderBuilder(reader)
+                .withCSVParser(parser)
+                .withSkipLines(1)
+                .build();
 
-            List<String[]> linhas = csvReader.readAll();
+        List<String[]> linhas = csvReader.readAll();
+        Fornecedor fornecedorDoProduto = iFornecedorRepository.findById(idFornecedor).get();
 
-            for (String[] linha : linhas) {
-                String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
+        for (String[] linha : linhas) {
 
-                boolean verificarFornecedor = this.checkFornecedorFromProduto(Long.parseLong(linhaTemp[7]), idFornecedor);
+            try {
+                CategoriaProdutoDTO categoriaProdutoDTO = getOrCreateCategoria(linha[9], linha[10], fornecedorDoProduto);
 
-                if (verificarFornecedor) {
+                LinhaCategoriaDTO linhaCategoria = getOrCreateLinha(linha[8], linha[7], categoriaProdutoDTO);
 
-                    Optional<Produto> produtoExistente = iProdutoRepository.findByCodProduto(linhaTemp[1]);
+                ProdutoDTO produtoDTO = new ProdutoDTO();
+                produtoDTO.setCodProduto(linha[1]);
+                produtoDTO.setNomeProduto(linha[2]);
+                Double preco = Double.parseDouble(linha[3].replaceAll("[^0-9.,]", ""));
+                produtoDTO.setPrecoProduto(preco);
+                produtoDTO.setUnidadeProduto(Integer.parseInt(linha[4]));
+                Double peso = Double.parseDouble(linha[5].replaceAll("[^0-9.,]", ""));
+                produtoDTO.setPesoUnidade(peso);
+                String unidadeMedida = linha[5].replaceAll("[0-9.,]", "");
+                produtoDTO.setUnidadeMedida(unidadeMedida);
+                LocalDateTime validade = DateValidator.convertToLocalDateTime(linha[6]);
+                produtoDTO.setValidadeProduto(validade);
+                produtoDTO.setLinhaCategoria(linhaCategoria.getIdLinhaCategoria());
 
-                    if (produtoExistente.isPresent()) {
+                if (categoriaProdutoDTO.getFornecedor() == fornecedorDoProduto.getId()) {
 
-                        ProdutoDTO produtoDTOUpdate = new ProdutoDTO();
-                        produtoDTOUpdate.setIdProduto(produtoExistente.get().getId());
-                        produtoDTOUpdate.setCodProduto(linhaTemp[1]);
-                        produtoDTOUpdate.setNomeProduto(linhaTemp[2]);
-                        produtoDTOUpdate.setPrecoProduto(Double.parseDouble(linhaTemp[3]));
-                        produtoDTOUpdate.setUnidadeProduto(Integer.parseInt(linhaTemp[4]));
-                        produtoDTOUpdate.setPesoUnidade(Double.parseDouble(linhaTemp[5]));
-                        produtoDTOUpdate.setValidadeProduto(linhaTemp[6]);
-                        produtoDTOUpdate.setLinhaCategoria(Long.parseLong(linhaTemp[7]));
-                        this.update(produtoDTOUpdate, produtoDTOUpdate.getIdProduto());
+                    createOrUpdateProduto(produtoDTO, linhaCategoria);
 
-                    } else {
-
-                        LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(Long.parseLong(linhaTemp[7]));
-
-                        Produto produto = new Produto(linhaTemp[1], linhaTemp[2],
-                                Double.parseDouble(linhaTemp[3]), Integer.parseInt(linhaTemp[4]),
-                                Double.parseDouble(linhaTemp[5]), linhaTemp[6], linhaCategoria);
-
-                        this.iProdutoRepository.save(produto);
-                    }
+                } else {
+                    LOGGER.info("Produto de outro fornecedor");
                 }
-
+            } catch (Exception e) {
+                LOGGER.info("Linha do CSV Inválida");
             }
-
+        }
     }
 
-    public boolean checkFornecedorFromProduto(Long idLinha, Long idFornecedorToCheck) {
-        boolean isSameFornecedor = false;
-        LinhaCategoria linhaCategoria = linhaCategoriaService.findLinhaById(idLinha);
-        isSameFornecedor = linhaCategoria.getCategoriaProduto().getFornecedor().getId() == idFornecedorToCheck;
-        return isSameFornecedor;*/
 
-
-    }
     public String formatDecimal(Double valor) {
         DecimalFormat df = new DecimalFormat("0.00");
         df.setMaximumFractionDigits(2);
         String valorFormatado = df.format(valor);
         return valorFormatado;
+    }
+
+    public CategoriaProdutoDTO getOrCreateCategoria(String codCategoria, String nomeCategoria, Fornecedor fornecedor) {
+        String codCategoriatemp = codCategoria;
+        if (codCategoria.length() <= 3) {
+            codCategoriatemp = CodeManager.codCategoriaGenerator(new CategoriaProduto(codCategoria, nomeCategoria, fornecedor));
+        }
+        CategoriaProdutoDTO categoriaProdutoDTO = new CategoriaProdutoDTO();
+
+        Optional<CategoriaProduto> categoriaExistente = iCategoriaProdutoRepository.findByCode(codCategoriatemp);
+
+        if (categoriaExistente.isPresent()) {
+            categoriaProdutoDTO = CategoriaProdutoDTO.of(categoriaExistente.get());
+            LOGGER.info("Retornando Categoria existente de id: {};", categoriaProdutoDTO.getId());
+            return categoriaProdutoDTO;
+        } else {
+            categoriaProdutoDTO.setNome(nomeCategoria);
+            categoriaProdutoDTO.setCodCategoria(codCategoria);
+            categoriaProdutoDTO.setFornecedor(fornecedor.getId());
+            try {
+                categoriaProdutoDTO = categoriaProdutoService.save(categoriaProdutoDTO);
+            } catch (Exception e) {
+                LOGGER.info("Erro ao salvar Categoria");
+                LOGGER.error(e.toString());
+            }
+
+            return categoriaProdutoDTO;
+        }
+    }
+
+    public LinhaCategoriaDTO getOrCreateLinha(String nomeLinha, String codLinha, CategoriaProdutoDTO categoriaProdutoDTO) {
+        codLinha = CodeManager.codLinhaGenerator(codLinha);
+        Optional<LinhaCategoria> linhaExistente = iLinhaCategoriaRepository.findByCode(codLinha);
+
+        LinhaCategoriaDTO linhaCategoriaDTO = new LinhaCategoriaDTO();
+
+        if (linhaExistente.isPresent()) {
+            linhaCategoriaDTO = LinhaCategoriaDTO.of(linhaExistente.get());
+
+            if (linhaCategoriaDTO.getCategoriaProduto() != categoriaProdutoDTO.getId()) {
+                linhaCategoriaDTO.setCategoriaProduto(categoriaProdutoDTO.getId());
+                try {
+                    linhaCategoriaDTO = linhaCategoriaService.update(linhaCategoriaDTO, linhaCategoriaDTO.getIdLinhaCategoria());
+                } catch (Exception e) {
+                    LOGGER.info("Erro ao dar um update na Linha");
+                    LOGGER.error(e.toString());
+                }
+
+            }
+            LOGGER.info("Retornando linha updatada: {}", linhaCategoriaDTO.getIdLinhaCategoria());
+            return linhaCategoriaDTO;
+        } else {
+            linhaCategoriaDTO.setNomeLinha(nomeLinha);
+            linhaCategoriaDTO.setCodLinha(CodeManager.codLinhaGenerator(codLinha));
+            linhaCategoriaDTO.setCategoriaProduto(categoriaProdutoDTO.getId());
+
+            try {
+                linhaCategoriaDTO = linhaCategoriaService.save(linhaCategoriaDTO);
+            } catch (Exception e) {
+                LOGGER.info("Erro ao salvar Linha");
+                LOGGER.error(e.toString());
+            }
+            LOGGER.info("Retornando nova linha: {}", linhaCategoriaDTO.getIdLinhaCategoria());
+            return linhaCategoriaDTO;
+        }
+    }
+
+    public void createOrUpdateProduto(ProdutoDTO produtoDTO, LinhaCategoriaDTO linhaCategoria) {
+        String codeToFind = produtoDTO.getCodProduto();
+        if (codeToFind.length() < 10) {
+            codeToFind = CodeManager.generateProdutoCode(produtoDTO.getCodProduto());
+        }
+        Optional<Produto> produtoexistente = iProdutoRepository.findByCodProduto(codeToFind);
+        if (produtoexistente.isPresent()) {
+            produtoDTO = ProdutoDTO.of(produtoexistente.get());
+            produtoDTO.setLinhaCategoria(linhaCategoria.getIdLinhaCategoria());
+            try {
+                update(produtoDTO, produtoDTO.getIdProduto());
+            } catch (Exception e) {
+                LOGGER.info("Erro ao dar update no Produto");
+                LOGGER.error(e.toString());
+            }
+
+
+        } else {
+            try {
+                save(produtoDTO);
+            } catch (Exception e) {
+                LOGGER.info("Erro ao salvar Produto");
+                LOGGER.error(e.toString());
+            }
+
+        }
+
     }
 }

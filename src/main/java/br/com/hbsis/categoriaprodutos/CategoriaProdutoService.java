@@ -18,11 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.text.MaskFormatter;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.*;
+import java.util.List;
 
 @Service
 public class CategoriaProdutoService {
@@ -45,9 +47,9 @@ public class CategoriaProdutoService {
 
         this.validate(categoriaProdutoDTO);
 
-        LOGGER.info("Salvando Produto");
-        LOGGER.debug("Produto: {}", categoriaProdutoDTO);
-        LOGGER.debug("Fornecedor {}", categoriaProdutoDTO.getFornecedor());
+        LOGGER.info("Salvando Categoria");
+        LOGGER.debug("Categoria: {}", categoriaProdutoDTO);
+        LOGGER.debug("Fornecedor da categoria {}", categoriaProdutoDTO.getFornecedor());
 
 
         CategoriaProduto categoriaProduto = new CategoriaProduto(
@@ -63,10 +65,10 @@ public class CategoriaProdutoService {
     }
 
     private void validate(CategoriaProdutoDTO categoriaProdutoDTO) {
-        LOGGER.info("Validando Produto");
+        LOGGER.info("Validando categoria");
 
         if (categoriaProdutoDTO == null) {
-            throw new IllegalArgumentException("ProdutoDTO não deve ser nulo");
+            throw new IllegalArgumentException("categoriaDTO não deve ser nulo");
         }
 
         if (StringUtils.isEmpty(categoriaProdutoDTO.getCodCategoria())) {
@@ -148,16 +150,28 @@ public class CategoriaProdutoService {
     private void readDataFromCsv(MultipartFile file) throws IOException {
 
         InputStreamReader reader = new InputStreamReader(file.getInputStream());
-        CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
+        CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
+        CSVReader csvReader = new CSVReaderBuilder(reader)
+                .withSkipLines(1)
+                .withCSVParser(parser)
+                .build();
 
         List<String[]> linhas = csvReader.readAll();
 
         for (String[] linha : linhas) {
-            String[] linhaTemp = linha[0].replaceAll("\"", "").split(";");
-            String cnpj = CnpjValidator.cleanCnpj(linhaTemp[4]);
+
+            String cnpj = CnpjValidator.cleanCnpj(linha[4]);
             Fornecedor fornecedor = iFornecedorRepository.findFirstByCnpj(cnpj);
-            if (!iCategoriaProdutoRepository.findByCode(linhaTemp[1]).isPresent()) {
-                save(CategoriaProdutoDTO.of(new CategoriaProduto(linhaTemp[1], linhaTemp[2], fornecedor)));
+            Optional<CategoriaProduto> categoria = iCategoriaProdutoRepository.findByCode(linha[1]);
+            if (!categoria.isPresent()) {
+                try{
+
+                    save(CategoriaProdutoDTO.of(new CategoriaProduto(linha[1], linha[2], fornecedor)));
+                }catch (Exception e ){
+                    LOGGER.info("Erro ao salvar categoria.");
+                    LOGGER.error(e.toString());
+                }
+
             }
 
         }
