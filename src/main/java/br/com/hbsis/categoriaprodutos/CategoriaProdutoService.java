@@ -201,13 +201,16 @@ public class CategoriaProdutoService {
                 withEscapeChar(CSVWriter.DEFAULT_ESCAPE_CHARACTER).
                 withLineEnd(CSVWriter.DEFAULT_LINE_END).
                 build();
+
         String headerCSV[] = {"ID_CATEGORIA", "COD_CATEGORIA", "NOME_CATEGORIA", "RAZÃO_SOCIAL", "CNPJ_FORNECEDOR"};
         icsvWriter.writeNext(headerCSV);
-        for (CategoriaProduto row : this.findAll()) {
-            icsvWriter.writeNext(new String[]{row.getId().toString(), row.getCodCategoria(),
-                    row.getNome(), row.getFornecedor().getRazaoSocial(),
-                    formatCnpj(row.getFornecedor().getCnpj())});
-            LOGGER.info("Exportando categoria de produto de ID: {}", row.getId());
+        for (CategoriaProduto linha : this.findAll()) {
+            icsvWriter.writeNext(
+                    new String[]{linha.getId().toString(), linha.getCodCategoria(),
+                    linha.getNome(), linha.getFornecedor().getRazaoSocial(),
+                    formatCnpj(linha.getFornecedor().getCnpj())}
+                    );
+            LOGGER.info("Exportando categoria de produto de ID: {}", linha.getId());
         }
     }
 
