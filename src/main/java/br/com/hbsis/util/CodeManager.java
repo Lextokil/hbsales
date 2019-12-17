@@ -5,6 +5,8 @@ import br.com.hbsis.linhacategoria.LinhaCategoria;
 import br.com.hbsis.linhacategoria.LinhaCategoriaDTO;
 import org.apache.commons.lang.StringUtils;
 
+import java.time.LocalDateTime;
+
 public class CodeManager {
 
     public static String codCategoriaGenerator(CategoriaProduto categoriaProduto) {
@@ -34,17 +36,21 @@ public class CodeManager {
 
 
     public static String generateProdutoCode(String code) {
-        String codeGenerated = StringUtils.leftPad(code, 10, "0");
+        String codeGenerated= code;
+        codeGenerated.replaceAll("[^a-zA-Z0-9]+", "");
+        codeGenerated = StringUtils.leftPad(code, 10, "0");
         return codeGenerated.toUpperCase();
 
     }
-    public static String codLinhaGenerator(String codLinha){
+
+    public static String codLinhaGenerator(String codLinha) {
         String code = codLinha;
-        code = code.replaceAll("[^a-zA-Z0-9]+","");
+        code.replaceAll("[^a-zA-Z0-9]+", "");
         code = StringUtils.leftPad(code, 10, "0");
 
         return code.toUpperCase();
 
     }
+
 
 }

@@ -3,8 +3,11 @@ package br.com.hbsis.funcionario;
 import com.microsoft.sqlserver.jdbc.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +23,7 @@ public class FuncionarioService {
     }
 
     public FuncionarioDTO save(FuncionarioDTO funcionarioDTO) {
+        funcionarioDTO = getEmployeesUuid(funcionarioDTO);
         this.validate(funcionarioDTO);
 
         LOGGER.info("Salvando Funcionario");
@@ -27,7 +31,8 @@ public class FuncionarioService {
 
         Funcionario funcionarioSave = new Funcionario(
                 funcionarioDTO.getNome(),
-                funcionarioDTO.getEmail());
+                funcionarioDTO.getEmail(),
+                funcionarioDTO.getUuid());
 
         funcionarioSave = this.iFuncionarioRepository.save(funcionarioSave);
 
@@ -49,6 +54,9 @@ public class FuncionarioService {
         if (StringUtils.isEmpty(funcionarioDTO.getEmail())) {
             throw new IllegalArgumentException("E-mail não deve ser nulo/vazio");
         }
+        if (StringUtils.isEmpty(funcionarioDTO.getUuid())) {
+            throw new IllegalArgumentException("Uuid não deve ser nulo/vazio");
+        }
 
     }
 
@@ -61,6 +69,8 @@ public class FuncionarioService {
 
         throw new IllegalArgumentException(String.format("ID %s não existe", id));
     }
+
+
 
 
     public List<Funcionario> findAll() {
@@ -95,5 +105,32 @@ public class FuncionarioService {
         LOGGER.info("Executando delete para funcionario de ID: [{}]", id);
 
         this.iFuncionarioRepository.deleteById(id);
+    }
+
+    private FuncionarioDTO getEmployeesUuid(FuncionarioDTO funcionarioDTO) {
+        // request url
+        String url = "http://nt-04053:9999/api/employees";
+
+        // create an instance of RestTemplate
+        RestTemplate restTemplate = new RestTemplate();
+
+        // create headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.set("Authorization", "f59fe89a-1b67-11ea-978f-2e728ce88125");
+
+
+        // build the request
+        HttpEntity<FuncionarioDTO> request = new HttpEntity<>(funcionarioDTO, headers);
+
+        // send POST request
+        ResponseEntity<FuncionarioResponseDTO> response = restTemplate.postForEntity(url, request, FuncionarioResponseDTO.class);
+
+        funcionarioDTO.setUuid(response.getBody().getEmployeeUuid());
+
+        // check response
+        LOGGER.info(response.getBody().toString());
+        return funcionarioDTO;
     }
 }

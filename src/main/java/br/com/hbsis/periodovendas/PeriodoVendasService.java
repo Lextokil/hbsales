@@ -119,22 +119,34 @@ public class PeriodoVendasService {
 
 
         if (periodoVendasOptional.isPresent()) {
-            PeriodoVendas periodoVendasExistente = periodoVendasOptional.get();
+            PeriodoVendas periodoVendasUpdate = periodoVendasOptional.get();
             Fornecedor fornecedor = fornecedorService.findFornecedorById(periodoVendasDTO.getIdFornecedor());
 
-            if (hoje.isBefore(periodoVendasExistente.getDataFinal())) {
-                LOGGER.info("Atualizando produto... id: [{}]", periodoVendasExistente.getId());
+            if (hoje.isBefore(periodoVendasUpdate.getDataFinal())) {
+                LOGGER.info("Atualizando produto... id: [{}]", periodoVendasUpdate.getId());
                 LOGGER.debug("Payload: {}", periodoVendasDTO);
-                LOGGER.debug("Produto Existente: {}", periodoVendasExistente);
+                LOGGER.debug("Produto Existente: {}", periodoVendasUpdate);
+
                 validate(periodoVendasDTO);
-                periodoVendasExistente.setDataInicio(DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataInicio()));
-                periodoVendasExistente.setDataFinal(DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataFinal()));
-                periodoVendasExistente.setDataRetirada(DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataRetirada()));
-                periodoVendasExistente.setFornecedor(fornecedor);
 
-                periodoVendasExistente = this.iPeriodoVendasRepository.save(periodoVendasExistente);
+                List<PeriodoVendas> periodosDoFornecedor = iPeriodoVendasRepository.findPeriodoByFornecedor(fornecedor.getId());
+                for (PeriodoVendas periodoVendasExistente : periodosDoFornecedor) {
+                    if (DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataInicio())
+                            .isBefore(periodoVendasExistente.getDataFinal().plusDays(1))
+                            && DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataInicio())
+                            .isAfter(periodoVendasExistente.getDataInicio().minusDays(1))) {
+                        throw new IllegalArgumentException("O fornecedor ja está em um periodo nessa data");
+                    }
 
-                return periodoVendasDTO.of(periodoVendasExistente);
+                    periodoVendasExistente.setDataInicio(DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataInicio()));
+                    periodoVendasExistente.setDataFinal(DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataFinal()));
+                    periodoVendasExistente.setDataRetirada(DateValidator.convertToLocalDateTime(periodoVendasDTO.getDataRetirada()));
+                    periodoVendasExistente.setFornecedor(fornecedor);
+
+                    periodoVendasExistente = this.iPeriodoVendasRepository.save(periodoVendasExistente);
+
+                    return periodoVendasDTO.of(periodoVendasExistente);
+                }
             }
             throw new IllegalArgumentException(String.format("Periodo de vendas encerrado!"));
 

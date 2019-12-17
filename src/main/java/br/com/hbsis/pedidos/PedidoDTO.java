@@ -3,6 +3,7 @@ package br.com.hbsis.pedidos;
 import br.com.hbsis.itempedido.ItemPedido;
 import br.com.hbsis.itempedido.ItemPedidoDTO;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,6 +12,8 @@ public class PedidoDTO {
 
     private Long id;
     private Set<ItemPedidoDTO> itemPedidoDTO;
+    private String status;
+    private String codigo;
     private Double valorTotal;
 
     public PedidoDTO() {
@@ -20,6 +23,7 @@ public class PedidoDTO {
         this.id = id;
         this.itemPedidoDTO = itemPedidoDTO;
         this.valorTotal = valorTotal;
+
     }
 
     public static PedidoDTO of (Pedido pedido){
@@ -50,6 +54,22 @@ public class PedidoDTO {
 
     public void setItemPedidoDTO(Set<ItemPedidoDTO> itemPedidoDTO) {
         this.itemPedidoDTO = itemPedidoDTO;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 
     public Double getValorTotal() {
