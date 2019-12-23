@@ -1,0 +1,4 @@
+ALTER TABLE funcionarios
+ALTER COLUMN uuid VARCHAR(36) NOT NULL;
+ALTER TABLE funcionarios
+ADD UNIQUE (uuid);

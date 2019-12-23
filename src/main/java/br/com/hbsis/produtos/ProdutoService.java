@@ -192,7 +192,6 @@ public class ProdutoService {
 
     public void exportFromData(HttpServletResponse response) throws IOException, ParseException {
         String filename = "produtos.csv";
-        Boolean succes = false;
 
         response.setContentType("text/csv");
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION,

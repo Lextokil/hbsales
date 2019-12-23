@@ -6,6 +6,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,9 +19,18 @@ public class Pedido {
     @Column(name = "id")
     private Long id;
 
-    @OneToMany(cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "id_pedido", referencedColumnName = "id")
     private Set<ItemPedido> itensPedido = new HashSet<>();
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "data_criacao")
+    private LocalDateTime dataCriacao;
+
+    @Column(name = "codigo")
+    private String codigo;
 
     @Column(name = "valor_total")
     private double valorTotal;
@@ -28,12 +38,11 @@ public class Pedido {
     public Pedido() {
     }
 
-    public Pedido(Set<ItemPedido> itemPedidoSet, double valorTotal) {
-        this.itensPedido = itemPedidoSet;
-        this.valorTotal = valorTotal;
-    }
-
-    public Pedido(double valorTotal) {
+    public Pedido(Set<ItemPedido> itensPedido, String status, LocalDateTime dataCriacao, String codigo, double valorTotal) {
+        this.itensPedido = itensPedido;
+        this.status = status;
+        this.dataCriacao = dataCriacao;
+        this.codigo = codigo;
         this.valorTotal = valorTotal;
     }
 
@@ -51,6 +60,30 @@ public class Pedido {
 
     public void setItensPedido(Set<ItemPedido> itensPedido) {
         this.itensPedido = itensPedido;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getDataCriacao() {
+        return dataCriacao;
+    }
+
+    public void setDataCriacao(LocalDateTime dataCriacao) {
+        this.dataCriacao = dataCriacao;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 
     public double getValorTotal() {
