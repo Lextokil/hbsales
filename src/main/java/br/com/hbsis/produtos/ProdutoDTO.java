@@ -1,6 +1,7 @@
 package br.com.hbsis.produtos;
 
 import br.com.hbsis.util.DateValidator;
+import br.com.hbsis.util.Extension;
 
 
 public class ProdutoDTO {
@@ -34,7 +35,7 @@ public class ProdutoDTO {
         return new ProdutoDTO(
                 produto.getId(),
                 produto.getCodProduto(),
-                produto.getNomeProduto(),
+                Extension.ARGS.getDescricao(),
                 produto.getPrecoProduto(),
                 produto.getUnidadeProduto(),
                 produto.getPesoUnidade(),

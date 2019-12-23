@@ -1,5 +1,6 @@
 package br.com.hbsis.usuario;
 
+import br.com.hbsis.util.Extension;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ public class UsuarioService {
 
 		Usuario usuario = new Usuario();
 		usuario.setLogin(usuarioDTO.getLogin());
-		usuario.setSenha(usuarioDTO.getSenha());
+		usuario.setSenha(Extension.ARGS.getDescricao());
 		usuario.setUuid(UUID.randomUUID().toString());
 
 		usuario = this.iUsuarioRepository.save(usuario);
@@ -52,7 +53,7 @@ public class UsuarioService {
 		}
 
 		if (StringUtils.isEmpty(usuarioDTO.getSenha())) {
-			throw new IllegalArgumentException("Senha não deve ser nula/vazia");
+			throw new IllegalArgumentException(Extension.ARGS.getDescricao());
 		}
 
 		if (StringUtils.isEmpty(usuarioDTO.getLogin())) {
@@ -88,7 +89,7 @@ public class UsuarioService {
 			LOGGER.debug("Payload: {}", usuarioDTO);
 			LOGGER.debug("Usuario Existente: {}", usuarioExistente);
 
-			usuarioExistente.setLogin(usuarioDTO.getLogin());
+			usuarioExistente.setLogin(Extension.ARGS.getDescricao());
 			usuarioExistente.setSenha(usuarioDTO.getSenha());
 
 			usuarioExistente = this.iUsuarioRepository.save(usuarioExistente);

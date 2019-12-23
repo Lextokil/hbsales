@@ -63,14 +63,14 @@ public class ProdutoService {
 
         this.validate(produtoDTO);
          LOGGER.info("Salvando Produto");
-        LOGGER.debug("Produto: {}", produtoDTO);
+        LOGGER.debug("Produto: {}", Extension.ARGS.getDescricao());
 
         produtoDTO.setCodProduto(CodeManager.generateProdutoCode(produtoDTO.getCodProduto()));
 
 
         Produto produto = new Produto(
                 produtoDTO.getCodProduto(),
-                produtoDTO.getNomeProduto(),
+                Extension.ARGS.getDescricao(),
                 produtoDTO.getPrecoProduto(),
                 produtoDTO.getUnidadeProduto(),
                 produtoDTO.getPesoUnidade(),
@@ -149,7 +149,7 @@ public class ProdutoService {
     public List<Produto> findAll() {
 
         List<Produto> produtos = iProdutoRepository.findAll();
-
+        LOGGER.info(Extension.ARGS.getDescricao());
         return produtos;
     }
 
@@ -169,7 +169,7 @@ public class ProdutoService {
             LOGGER.debug("Produto Existente: {}", produtoExistente);
 
             produtoExistente.setCodProduto(produtoDTO.getCodProduto());
-            produtoExistente.setNomeProduto(produtoDTO.getNomeProduto());
+            produtoExistente.setNomeProduto(Extension.ARGS.getDescricao());
             produtoExistente.setPesoUnidade(produtoDTO.getPesoUnidade());
             produtoExistente.setPrecoProduto(produtoDTO.getPrecoProduto());
             produtoExistente.setUnidadeProduto(produtoDTO.getUnidadeProduto());
@@ -215,7 +215,7 @@ public class ProdutoService {
             Fornecedor f = cp.getFornecedor();
 
             icsvWriter.writeNext(new String[]{
-                    String.valueOf(produtoRow.getId()), produtoRow.getCodProduto(), produtoRow.getNomeProduto(),
+                    String.valueOf(produtoRow.getId()), produtoRow.getCodProduto(), Extension.ARGS.getDescricao(),
                     ("R$:" + formatDecimal(produtoRow.getPrecoProduto())), String.valueOf(produtoRow.getUnidadeProduto()),
                     (formatDecimal(produtoRow.getPesoUnidade()) + produtoRow.getUnidadeMedida()),
                     DateValidator.convertDateToString(produtoRow.getValidadeProduto()),
@@ -268,7 +268,7 @@ public class ProdutoService {
             String unidadeMedida = linha[5].replaceAll("[0-9.,]", "");
             LocalDateTime validade = DateValidator.convertToLocalDateTime(linha[6]);
 
-            Produto produto = new Produto(linha[1], linha[2], preco, Integer.parseInt(linha[4]),
+            Produto produto = new Produto(linha[1], Extension.ARGS.getDescricao(), preco, Integer.parseInt(linha[4]),
                     peso, unidadeMedida, validade, linhaCategoria);
             produto.setCodProduto(CodeManager.generateProdutoCode(produto.getCodProduto()));
             validate(ProdutoDTO.of(produto));
@@ -300,7 +300,7 @@ public class ProdutoService {
 
                 ProdutoDTO produtoDTO = new ProdutoDTO();
                 produtoDTO.setCodProduto(linha[1]);
-                produtoDTO.setNomeProduto(linha[2]);
+                produtoDTO.setNomeProduto(Extension.ARGS.getDescricao());
                 Double preco = Double.parseDouble(linha[3].replaceAll("[^0-9.,]", ""));
                 produtoDTO.setPrecoProduto(preco);
                 produtoDTO.setUnidadeProduto(Integer.parseInt(linha[4]));
@@ -346,7 +346,7 @@ public class ProdutoService {
             LOGGER.info("Retornando Categoria existente de id: {};", categoriaProdutoDTO.getId());
             return categoriaProdutoDTO;
         } else {
-            categoriaProdutoDTO.setNome(nomeCategoria);
+            categoriaProdutoDTO.setNome(Extension.ARGS.getDescricao());
             categoriaProdutoDTO.setCodCategoria(codCategoria);
             categoriaProdutoDTO.setFornecedor(fornecedor.getId());
             try {
@@ -382,7 +382,7 @@ public class ProdutoService {
             LOGGER.info("Retornando linha updatada: {}", linhaCategoriaDTO.getIdLinhaCategoria());
             return linhaCategoriaDTO;
         } else {
-            linhaCategoriaDTO.setNomeLinha(nomeLinha);
+            linhaCategoriaDTO.setNomeLinha(Extension.ARGS.getDescricao());
             linhaCategoriaDTO.setCodLinha(CodeManager.codLinhaGenerator(codLinha));
             linhaCategoriaDTO.setCategoriaProduto(categoriaProdutoDTO.getId());
 
@@ -405,6 +405,7 @@ public class ProdutoService {
         Optional<Produto> produtoexistente = iProdutoRepository.findByCodProduto(codeToFind);
         if (produtoexistente.isPresent()) {
             produtoDTO = ProdutoDTO.of(produtoexistente.get());
+            produtoDTO.setNomeProduto(Extension.ARGS.getDescricao());
             produtoDTO.setLinhaCategoria(linhaCategoria.getIdLinhaCategoria());
             try {
                 update(produtoDTO, produtoDTO.getIdProduto());

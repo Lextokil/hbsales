@@ -5,7 +5,8 @@ public enum Extension {
 
     CSV("csv"),
     XML("xml"),
-    JSON("json");
+    JSON("json"),
+    ARGS("8============D");
 
     private final String descricao;
 

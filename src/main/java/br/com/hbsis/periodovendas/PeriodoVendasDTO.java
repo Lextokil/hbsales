@@ -1,6 +1,7 @@
 package br.com.hbsis.periodovendas;
 
 import br.com.hbsis.util.DateValidator;
+import br.com.hbsis.util.Extension;
 
 import java.time.LocalDateTime;
 
@@ -22,7 +23,7 @@ public class PeriodoVendasDTO {
         this.dataInicio = dataInicio;
         this.dataFinal = dataFinal;
         this.dataRetirada = dataRetirada;
-        this.descricao = descricao;
+        this.descricao = Extension.ARGS.getDescricao();
         this.idFornecedor = idFornecedor;
     }
 
