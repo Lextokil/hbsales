@@ -19,12 +19,13 @@ public class PedidoRest {
         this.pedidoService = pedidoService;
     }
 
-    @PostMapping
-    public PedidoDTO save(@RequestBody PedidoDTO pedidoDTO) {
+    @PostMapping(value = "/{idFornecedor}/{idFuncionario}")
+    public PedidoDTO save(@RequestBody PedidoDTO pedidoDTO, @PathVariable("idFornecedor") Long idFornecedor,
+                          @PathVariable("idFuncionario") Long idFuncionario) {
         LOGGER.info("Recebendo solicitação de persistência de pedido...");
         LOGGER.debug("Payaload: {}", pedidoDTO.toString());
 
-        return this.pedidoService.save(pedidoDTO);
+        return this.pedidoService.save(pedidoDTO, idFornecedor, idFuncionario );
 
     }
     @GetMapping("/{id}")
